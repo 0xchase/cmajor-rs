@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+libloading = "0.8.3"
 # windows-interface = "0.53.0"
 
 [profile.dev]
