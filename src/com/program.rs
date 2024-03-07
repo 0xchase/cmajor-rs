@@ -36,8 +36,8 @@ impl ProgramInterface {
         let contents = CString::new(file_contents).unwrap();
 
         unsafe {
-            println!("ParseInterface object vtable at 0x{:x}", self.object_vtable as usize);
-            println!("ParseInterface vtable at 0x{:x}", self.vtable as usize);
+            println!("ParseInterfaceVtable at 0x{:x}", self.vtable as usize);
+            println!("ParseInterfaceVtable at 0x{:x}", self.vtable as usize);
 
             let count = ((*self.object_vtable).add_ref)(self as *const ProgramInterface as *const Object);
             println!("Ref count is {}", count);
