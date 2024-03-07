@@ -10,7 +10,7 @@ type HandleCodeGenOutput = fn (context: c_void, generated_code: *const u8, gener
 
 #[repr(C)]
 pub struct EngineInterface {
-    get_build_settings: unsafe fn () -> ChocString,
+    get_build_settings_: unsafe fn () -> *mut ChocString,
     set_build_settings: unsafe fn (settings: *const u8),
     load: unsafe fn (program: *mut ProgramInterface, request_variable_context: c_void, v: RequestExternalVariableFn, request_function_context: c_void, f: RequestExternalFunctionFn),
     set_external_variable: unsafe fn (name: *const u8, serialised_value_data: *const c_void, serialized_value_size: usize),
@@ -24,4 +24,15 @@ pub struct EngineInterface {
     is_linked: unsafe fn () -> bool,
     generate_code: unsafe fn (target_type: *const u8, options: *const u8, callback_context: *mut c_void, HandleCodeGenOutput),
     get_available_code_gen_target_types: unsafe fn () -> *const u8
+}
+
+impl EngineInterface {
+    pub fn get_build_settings(&self) -> String {
+        unsafe {
+            let t = Box::from_raw((self.get_build_settings_)());
+            todo!()
+        }
+    }
+
+    // set_build_settings
 }

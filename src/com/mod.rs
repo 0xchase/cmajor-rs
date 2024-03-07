@@ -6,7 +6,6 @@ mod performer;
 mod program;
 
 use core::slice;
-use std::ffi::CString;
 
 pub use database::*;
 pub use engine_factory::*;

@@ -24,7 +24,7 @@ impl Library {
         }
     }
 
-    pub fn get_version(&self) -> String {
+    pub fn get_version(&self) -> &'static CStr {
         let entries = self.get_entry_points();
 
         println!("Entries at {:p}", entries);
@@ -34,13 +34,18 @@ impl Library {
         println!("Create engine factory at {:p}", entries.create_engine_factory);
 
         unsafe {
-            let ptr = (entries.get_version)();
-            CStr::from_ptr(ptr)
-                .to_str()
-                .unwrap()
-                .to_string()
+            CStr::from_ptr(
+                (entries.get_version)()
+            )
         }
+    }
 
+    pub fn get_engine_types(&self) -> *const i8 {
+        let entries = self.get_entry_points();
+
+        unsafe {
+            (entries.get_engine_types)()
+        }
     }
 
     pub fn create_program(&self) -> Box<ProgramInterface> {
@@ -52,15 +57,17 @@ impl Library {
         }
     }
 
-    pub fn get_engine_types(&self) -> String {
+    pub fn create_engine_factory(&self, option: *const i8) -> Box<EngineFactoryInterface> {
         let entries = self.get_entry_points();
 
         unsafe {
-            let ptr = (entries.get_engine_types)();
-            CStr::from_ptr(ptr)
-                .to_str()
-                .unwrap()
-                .to_string()
+            let ptr = (entries.create_engine_factory)(option);
+
+            if ptr as usize == 0 {
+                panic!("Failed to create engine factory");
+            } else {
+                Box::from_raw(ptr)
+            }
         }
     }
 
@@ -119,5 +126,5 @@ pub struct EntryPoints {
     get_version: unsafe fn () -> *mut i8,
     create_program: unsafe fn () -> *mut ProgramInterface,
     get_engine_types: unsafe fn () -> *const i8,
-    create_engine_factory: unsafe fn (*const i8),
+    create_engine_factory: unsafe fn (*const i8) -> *mut EngineFactoryInterface,
 }
