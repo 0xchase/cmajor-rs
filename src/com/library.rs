@@ -53,7 +53,13 @@ impl Library {
 
         unsafe {
             let ptr = (entries.create_program)();
-            Box::from_raw(ptr)
+
+            if ptr as usize == 0 {
+                panic!("Failed to create program");
+            } else {
+                println!("Program at {:p}", ptr);
+                Box::from_raw(ptr)
+            }
         }
     }
 
@@ -85,6 +91,14 @@ impl Library {
                 .unwrap()
         }
     }
+}
+
+#[repr(C)]
+pub struct EntryPoints {
+    get_version: unsafe fn () -> *mut i8,
+    create_program: unsafe fn () -> *mut ProgramInterface,
+    get_engine_types: unsafe fn () -> *const i8,
+    create_engine_factory: unsafe fn (*const i8) -> *mut EngineFactoryInterface,
 }
 
 /*impl Drop for Library {
@@ -120,11 +134,3 @@ impl Library {
             .unwrap()
     }
 }*/
-
-#[repr(C)]
-pub struct EntryPoints {
-    get_version: unsafe fn () -> *mut i8,
-    create_program: unsafe fn () -> *mut ProgramInterface,
-    get_engine_types: unsafe fn () -> *const i8,
-    create_engine_factory: unsafe fn (*const i8) -> *mut EngineFactoryInterface,
-}

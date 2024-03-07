@@ -13,6 +13,8 @@ pub fn main() {
     let contents = std::fs::read_to_string(path)
         .unwrap();
 
+    // Library stuff
+
     let version = library
         .get_version()
         .to_str()
@@ -20,22 +22,7 @@ pub fn main() {
 
     println!("\nVersion is {}", version);
 
-    println!("Creating program");
-    let program = library.create_program();
-
     let types = library.get_engine_types();
-
-    println!("{}", unsafe { CStr::from_ptr(types).to_str().unwrap() });
-
-    let name = CString::new("llvm").unwrap();
-
-    println!("Create engine factory");
-    let factory = library.create_engine_factory(
-        name.as_ptr()
-    );
-
-    println!("Factory {:p}", Box::into_raw(factory));
-
     unsafe {
         let types2 = CStr::from_ptr(types)
             .to_str()
@@ -43,6 +30,25 @@ pub fn main() {
 
         println!("Types {}", types2);
     }
+
+    // Program stuff
+
+    let name = CString::new("Filter.cmajor").unwrap();
+    let contents2 = CString::new(contents.as_bytes()).unwrap();
+
+    let program = library.create_program();
+    let info = program.parse("Filter.cmajor", &contents);
+    let data = program.get_syntax_tree("", false, true, true);
+
+    // Engine stuff
+
+    let name = CString::new("llvm").unwrap();
+    let factory = library.create_engine_factory(name.as_ptr());
+
+    println!("Engine:");
+    factory.get_name();
+
+    // println!(" > Loaded {}", factory.get_name())
 
     // let name = factory.get_name();
 
