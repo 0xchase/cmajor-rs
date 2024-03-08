@@ -26,13 +26,13 @@ pub struct Object;
 
 #[repr(C)]
 pub struct ChocStringVtable {
+    object: ObjectVtable,
     begin: unsafe fn (*const ChocString) -> *mut u8,
     end: unsafe fn (*const ChocString) -> *mut u8
 }
 
 #[repr(C)]
 pub struct ChocString {
-    // object_vtable: *const ObjectVtable,
     vtable: *const ChocStringVtable
 }
 

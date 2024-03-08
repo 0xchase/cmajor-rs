@@ -1,0 +1,14 @@
+processor GainProcessor
+{
+    input  stream float in;    // declare an input and output stream of floats
+    output stream float out;
+
+    void main()
+    {
+        loop   // infinite loop
+        {
+            out <- in * 0.5f;  // read our next input value, multiply by 0.5, and send it to our output
+            advance();         // advance to the next frame
+        }
+    }
+}

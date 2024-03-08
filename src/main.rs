@@ -9,9 +9,11 @@ use api::*;
 pub fn main() {
     let library = Library::load("cmajor/x64/libCmajPerformer.so");
 
-    let path = "../cmajor/examples/patches/Filter/Filter.cmajor";
+    let path = "test.cmajor";
     let contents = std::fs::read_to_string(path)
         .unwrap();
+
+    println!("{}", contents);
 
     // Library stuff
 
@@ -33,20 +35,22 @@ pub fn main() {
 
     // Program stuff
 
-    let name = CString::new("Filter.cmajor").unwrap();
-    let contents2 = CString::new(contents.as_bytes()).unwrap();
-
     let program = library.create_program();
-    let info = program.parse("Filter.cmajor", &contents);
-    let data = program.get_syntax_tree("", false, true, true);
+    program.parse("test.cmajor", &contents);
+
+    let tree = program.get_syntax_tree("", false, true, true);
+    println!("Tree is {}", tree);
 
     // Engine stuff
 
-    let name = CString::new("llvm").unwrap();
-    let factory = library.create_engine_factory(name.as_ptr());
+    let factory = library.create_engine_factory("llvm");
 
     println!("Engine:");
-    factory.get_name();
+    unsafe {
+        let name = (*factory).get_name();
+        let name = CStr::from_ptr(name);
+        println!("Other {}", name.to_str().to_owned().unwrap());
+    }
 
     // println!(" > Loaded {}", factory.get_name())
 

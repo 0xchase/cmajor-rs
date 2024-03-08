@@ -4,6 +4,7 @@ use super::*;
 
 #[repr(C)]
 pub struct EngineFactoryInterfaceVtable {
+    object: ObjectVtable,
     create_engine: unsafe fn (
         *const EngineFactoryInterface,
         engine_creation_options: *const i8
@@ -19,19 +20,18 @@ pub struct EngineFactoryInterface {
 }
 
 impl EngineFactoryInterface {
-    pub fn create_engine(&self, engine_creation_options: *const i8) -> Box<EngineInterface> {
+    pub fn create_engine(&self, engine_creation_options: *const i8) -> *const EngineInterface {
         unsafe {
             let ptr = ((*self.vtable).create_engine)(
                 self as *const EngineFactoryInterface,
                 engine_creation_options
             );
 
-            Box::from_raw(ptr)
+            ptr
         }
     }
 
     pub fn get_name(&self) -> *const i8 {
-        // println!("Creating engine {:p}", self.get_name);
         unsafe {
             ((*self.vtable).get_name)(self)
         }

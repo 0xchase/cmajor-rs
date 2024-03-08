@@ -63,16 +63,20 @@ impl Library {
         }
     }
 
-    pub fn create_engine_factory(&self, option: *const i8) -> Box<EngineFactoryInterface> {
+    pub fn create_engine_factory(&self, option: &str) -> *const EngineFactoryInterface {
+        println!("Creating engine factory");
+
         let entries = self.get_entry_points();
+        let option = CString::new(option).unwrap();
 
         unsafe {
-            let ptr = (entries.create_engine_factory)(option);
+            println!("Calling create_engine_factory");
+            let ptr = (entries.create_engine_factory)(std::ptr::null());
 
             if ptr as usize == 0 {
                 panic!("Failed to create engine factory");
             } else {
-                Box::from_raw(ptr)
+                ptr
             }
         }
     }
