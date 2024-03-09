@@ -1,7 +1,7 @@
 mod com;
 mod api;
 
-use std::ffi::{CStr, CString};
+use std::{ffi::{CStr, CString}};
 
 use com::*;
 use api::*;
@@ -24,33 +24,50 @@ pub fn main() {
 
     println!("\nVersion is {}", version);
 
-    let types = library.get_engine_types();
-    unsafe {
-        let types2 = CStr::from_ptr(types)
-            .to_str()
-            .unwrap();
-
-        println!("Types {}", types2);
-    }
-
     // Program stuff
 
+    // println!("Size is {}", std::mem::size_of::<ProgramInterfaceVtable>());
+    // println!("Size is {}", std::mem::size_of::<ObjectVtable<ProgramInterfaceVtable>>());
     let program = library.create_program();
-    
+
     program.parse("test.cmajor", &contents);
 
-    let tree = program.get_syntax_tree("", false, true, true);
-    println!("Tree is {}", tree);
+    /*let tree = program.get_syntax_tree("", false, true, true);
+    println!("Tree is {}", tree);*/
+
+    // Engine Factory stuff
+
+    println!("Size is {}", std::mem::size_of::<EntryPoints>());
+    let types = library.get_engine_types();
+    let factory = library.create_engine_factory("llvm");
+    let name = factory.get_name();
+    println!("Factory name is {}", name);
 
     // Engine stuff
 
-    let factory = library.create_engine_factory("llvm");
+    let engine = factory.create_engine("");
 
-    println!("\nEngine factory:");
+    let linked = engine.is_linked();
+    let loaded = engine.is_loaded();
+    println!("Linked: {}, Loaded: {}", linked, loaded);
+
+    // let settings = engine.get_build_settings();
+    // engine.set_build_settings(&settings);
+
+    engine.load(&program).unwrap();
+
+    let linked = engine.is_linked();
+    let loaded = engine.is_loaded();
+    println!("Linked: {}, Loaded: {}", linked, loaded);
+
+    let details = engine.get_program_details().unwrap();
+    println!("Details: {}", details);
+
+    /*println!("\nEngine factory:");
     let name = factory.get_name();
     println!("> Factory name {}", name);
 
-    let engine = factory.create_engine("");
+    let engine = factory.create_engine("");*/
 
     // println!(" > Loaded {}", factory.get_name())
 

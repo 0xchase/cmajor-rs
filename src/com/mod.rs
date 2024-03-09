@@ -23,14 +23,6 @@ pub struct Object<T> {
 
 impl<T> Object<T> {
     pub fn from(ptr: *mut *const ObjectVtable<T>) -> Self {
-        unsafe {
-            let count = ((**ptr).get_reference_count)(ptr);
-            println!("Starting ref {}", count);
-
-            let count = ((**ptr).add_ref)(ptr);
-            println!("Ending ref {}", count);
-        }
-
         Self { ptr }
 
     }
@@ -68,9 +60,9 @@ impl<T> Drop for Object<T> {
 
 #[repr(C)]
 pub struct ObjectVtable<T> {
-    add_ref: fn (*mut *const ObjectVtable<T>) -> i32,
-    release: fn (*mut *const ObjectVtable<T>) -> i32,
-    get_reference_count: fn(*mut *const ObjectVtable<T>) -> i32,
+    add_ref: unsafe extern "C" fn (*mut *const Self) -> i32,
+    release: unsafe extern "C" fn (*mut *const Self) -> i32,
+    get_reference_count: unsafe extern "C" fn(*mut *const Self) -> i32,
     table: T
 }
 

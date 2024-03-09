@@ -12,13 +12,13 @@ pub struct SyntaxTreeOptions {
 
 #[repr(C)]
 pub struct ProgramInterfaceVtable {
-    pub parse2: unsafe fn (
+    pub parse2: unsafe extern "C" fn (
         *mut *const ObjectVtable<Self>,
         filename: *const i8,
         file_content: *const i8,
         file_content_size: usize
     ) -> *mut *const ObjectVtable<ChocStringVtable>,
-    pub get_syntax_tree: unsafe fn (
+    pub get_syntax_tree: unsafe extern "C" fn (
         *mut *const ObjectVtable<Self>,
         &SyntaxTreeOptions
     ) -> *mut *const ObjectVtable<ChocStringVtable>

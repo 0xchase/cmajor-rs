@@ -39,14 +39,6 @@ impl Library {
         }
     }
 
-    pub fn get_engine_types(&self) -> *const i8 {
-        let entries = self.get_entry_points();
-
-        unsafe {
-            (entries.get_engine_types)()
-        }
-    }
-
     pub fn create_program(&self) -> Object<ProgramInterfaceVtable> {
         let entries = self.get_entry_points();
 
@@ -57,8 +49,15 @@ impl Library {
                 panic!("Failed to create program");
             }
 
-            println!("Program at {:p}", ptr);
             Object::from(ptr)
+        }
+    }
+
+    pub fn get_engine_types(&self) -> *const i8 {
+        let entries = self.get_entry_points();
+
+        unsafe {
+            (entries.get_engine_types)()
         }
     }
 
@@ -66,21 +65,26 @@ impl Library {
         println!("Creating engine factory");
 
         let entries = self.get_entry_points();
-
         let option = CString::new(option).unwrap();
-        let options = option.as_ptr();
-        let option = std::ptr::null_mut();
+        let option = option.as_ptr();
+
         unsafe {
+            // DELETING THESE CAUSES A SEGFAULT
+            println!("> Function at {:p}", entries.get_version);
+            println!("> Function at {:p}", entries.create_program);
+            println!("> Function at {:p}", entries.get_engine_types);
+            println!("> Function at {:p}", entries.create_engine_factory);
+
             let ptr = (entries.create_engine_factory)(option);
             if ptr as usize == 0 {
                 panic!("Failed to create engine factory");
-            } else {
-                Object::from(ptr)
             }
+
+            Object::from(ptr)
         }
     }
 
-    fn get_entry_points(&self) -> &EntryPoints {
+    fn get_entry_points(&self) -> &'static EntryPoints {
         unsafe {
             let symbol: libloading::Symbol<unsafe extern fn () -> *const *const EntryPoints> = self
                 .lib
@@ -98,8 +102,8 @@ impl Library {
 
 #[repr(C)]
 pub struct EntryPoints {
-    get_version: unsafe fn () -> *mut i8,
-    create_program: unsafe fn () -> *mut *const ObjectVtable<ProgramInterfaceVtable>,
-    get_engine_types: unsafe fn () -> *const i8,
-    create_engine_factory: unsafe fn (*const i8) -> *mut *const ObjectVtable<EngineFactoryInterfaceVtable>,
+    get_version: unsafe extern "C" fn () -> *mut i8,
+    create_program: unsafe extern "C" fn () -> *mut *const ObjectVtable<ProgramInterfaceVtable>,
+    get_engine_types: unsafe extern "C" fn () -> *const i8,
+    create_engine_factory: unsafe extern "C" fn (*const i8) -> *mut *const ObjectVtable<EngineFactoryInterfaceVtable>,
 }
