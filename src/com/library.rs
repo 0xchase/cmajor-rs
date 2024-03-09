@@ -66,10 +66,12 @@ impl Library {
         println!("Creating engine factory");
 
         let entries = self.get_entry_points();
-        let option = CString::new(option).unwrap();
 
+        let option = CString::new(option).unwrap();
+        let options = option.as_ptr();
+        let option = std::ptr::null_mut();
         unsafe {
-            let ptr = (entries.create_engine_factory)(std::ptr::null());
+            let ptr = (entries.create_engine_factory)(option);
             if ptr as usize == 0 {
                 panic!("Failed to create engine factory");
             } else {
