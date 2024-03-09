@@ -4,23 +4,18 @@ use super::*;
 
 #[repr(C)]
 pub struct EngineFactoryInterfaceVtable {
-    create_engine: unsafe fn (
+    create_engine: unsafe fn(
         *mut *const ObjectVtable<Self>,
-        engine_creation_options: *const i8
+        engine_creation_options: *const i8,
     ) -> *mut *const ObjectVtable<EngineInterfaceVtable>,
-    get_name: unsafe fn (
-        *mut *const ObjectVtable<Self>
-    ) -> *const i8
+    get_name: unsafe fn(*mut *const ObjectVtable<Self>) -> *const i8,
 }
 
 impl Object<EngineFactoryInterfaceVtable> {
     pub fn create_engine(&self, engine_creation_options: &str) -> Object<EngineInterfaceVtable> {
         let options = CString::new(engine_creation_options).unwrap();
         unsafe {
-            let ptr = ((**self.ptr).table.create_engine)(
-                self.ptr,
-                std::ptr::null()
-            );
+            let ptr = ((**self.ptr).table.create_engine)(self.ptr, std::ptr::null());
 
             Object::from(ptr)
         }
@@ -31,10 +26,7 @@ impl Object<EngineFactoryInterfaceVtable> {
             let ptr = ((**self.ptr).table.get_name)(self.ptr);
             let string = CStr::from_ptr(ptr);
 
-            string
-                .to_str()
-                .unwrap()
-                .to_string()
+            string.to_str().unwrap().to_string()
         }
     }
 }

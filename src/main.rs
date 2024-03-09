@@ -1,26 +1,22 @@
-mod com;
 mod api;
+mod com;
 
-use std::{ffi::{CStr, CString}};
+use std::ffi::{CStr, CString};
 
-use com::*;
 use api::*;
+use com::*;
 
 pub fn main() {
     let library = Library::load("cmajor/x64/libCmajPerformer.so");
 
     let path = "test.cmajor";
-    let contents = std::fs::read_to_string(path)
-        .unwrap();
+    let contents = std::fs::read_to_string(path).unwrap();
 
     println!("{}", contents);
 
     // Library stuff
 
-    let version = library
-        .get_version()
-        .to_str()
-        .unwrap();
+    let version = library.get_version().to_str().unwrap();
 
     println!("\nVersion is {}", version);
 
@@ -60,9 +56,7 @@ pub fn main() {
     let loaded = engine.is_loaded();
     println!("Linked: {}, Loaded: {}", linked, loaded);
 
-    let details = engine
-        .get_program_details()
-        .unwrap();
+    let details = engine.get_program_details().unwrap();
 
     println!("Details: {}", details);
 

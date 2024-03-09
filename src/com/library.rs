@@ -10,15 +10,14 @@ extern "C" {
 static SYMBOL_NAME: &[u8] = b"cmajor_getEntryPointsV9";
 
 pub struct Library {
-    lib: libloading::Library
+    lib: libloading::Library,
 }
 
 impl Library {
     pub fn load(path: &str) -> Self {
         unsafe {
             Self {
-                lib: libloading::Library::new(path)
-                    .unwrap()
+                lib: libloading::Library::new(path).unwrap(),
             }
         }
     }
@@ -30,13 +29,12 @@ impl Library {
         println!("Get version at {:p}", entries.get_version);
         println!("Get program at {:p}", entries.create_program);
         println!("Get engine types at {:p}", entries.get_engine_types);
-        println!("Create engine factory at {:p}", entries.create_engine_factory);
+        println!(
+            "Create engine factory at {:p}",
+            entries.create_engine_factory
+        );
 
-        unsafe {
-            CStr::from_ptr(
-                (entries.get_version)()
-            )
-        }
+        unsafe { CStr::from_ptr((entries.get_version)()) }
     }
 
     pub fn create_program(&self) -> Object<ProgramInterfaceVtable> {
@@ -56,9 +54,7 @@ impl Library {
     pub fn get_engine_types(&self) -> *const i8 {
         let entries = self.get_entry_points();
 
-        unsafe {
-            (entries.get_engine_types)()
-        }
+        unsafe { (entries.get_engine_types)() }
     }
 
     pub fn create_engine_factory(&self, option: &str) -> Object<EngineFactoryInterfaceVtable> {
@@ -86,24 +82,19 @@ impl Library {
 
     fn get_entry_points(&self) -> &'static EntryPoints {
         unsafe {
-            let symbol: libloading::Symbol<unsafe extern fn () -> *const *const EntryPoints> = self
-                .lib
-                .get(SYMBOL_NAME)
-                .unwrap();
+            let symbol: libloading::Symbol<unsafe extern "C" fn() -> *const *const EntryPoints> =
+                self.lib.get(SYMBOL_NAME).unwrap();
 
-            (symbol)()
-                .as_ref()
-                .unwrap()
-                .as_ref()
-                .unwrap()
+            (symbol)().as_ref().unwrap().as_ref().unwrap()
         }
     }
 }
 
 #[repr(C)]
 pub struct EntryPoints {
-    get_version: unsafe extern "C" fn () -> *mut i8,
-    create_program: unsafe extern "C" fn () -> *mut *const ObjectVtable<ProgramInterfaceVtable>,
-    get_engine_types: unsafe extern "C" fn () -> *const i8,
-    create_engine_factory: unsafe extern "C" fn (*const i8) -> *mut *const ObjectVtable<EngineFactoryInterfaceVtable>,
+    get_version: unsafe extern "C" fn() -> *mut i8,
+    create_program: unsafe extern "C" fn() -> *mut *const ObjectVtable<ProgramInterfaceVtable>,
+    get_engine_types: unsafe extern "C" fn() -> *const i8,
+    create_engine_factory:
+        unsafe extern "C" fn(*const i8) -> *mut *const ObjectVtable<EngineFactoryInterfaceVtable>,
 }
