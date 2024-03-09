@@ -60,7 +60,10 @@ pub fn main() {
     let loaded = engine.is_loaded();
     println!("Linked: {}, Loaded: {}", linked, loaded);
 
-    let details = engine.get_program_details().unwrap();
+    let details = engine
+        .get_program_details()
+        .unwrap();
+
     println!("Details: {}", details);
 
     /*println!("\nEngine factory:");
