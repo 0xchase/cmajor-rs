@@ -1,4 +1,4 @@
-use std::ffi::{c_void, CString};
+use std::ffi::{c_void, CStr, CString};
 
 use super::*;
 
@@ -40,9 +40,15 @@ pub struct EngineInterfaceVtable {
         unsafe fn(*mut *const ObjectVtable<Self>) -> *mut *const ObjectVtable<ChocStringVtable>,
     get_endpoint_handle:
         unsafe fn(*mut *const ObjectVtable<Self>, endpoint_id: *const i8) -> EndpointHandle,
-    link: unsafe fn(*mut *const ObjectVtable<Self>, *mut CacheDatabaseInterface),
-    create_performer: unsafe fn(*mut *const ObjectVtable<Self>) -> *mut PerformerInterfaceVtable,
-    get_last_build_log: unsafe fn(*mut *const ObjectVtable<Self>) -> *mut *const ChocStringVtable,
+    link: unsafe fn(
+        *mut *const ObjectVtable<Self>,
+        *mut *const ObjectVtable<CacheDatabaseInterfaceVtable>,
+    ) -> *mut *const ObjectVtable<ChocStringVtable>,
+    create_performer: unsafe fn(
+        *mut *const ObjectVtable<Self>,
+    ) -> *mut *const ObjectVtable<PerformerInterfaceVtable>,
+    get_last_build_log:
+        unsafe fn(*mut *const ObjectVtable<Self>) -> *mut *const ObjectVtable<ChocStringVtable>,
     is_loaded: unsafe fn(*mut *const ObjectVtable<Self>) -> bool,
     is_linked: unsafe fn(*mut *const ObjectVtable<Self>) -> bool,
     generate_code: unsafe fn(
@@ -128,6 +134,36 @@ impl Object<EngineInterfaceVtable> {
         unsafe { ((**self.ptr).table.get_endpoint_handle)(self.ptr, endpoint_id.as_ptr()) }
     }
 
+    pub fn link(&self, database: &Object<CacheDatabaseInterfaceVtable>) -> Result<(), String> {
+        unsafe {
+            let ptr = ((**self.ptr).table.link)(self.ptr, database.ptr);
+
+            if ptr as usize == 0 {
+                Ok(())
+            } else {
+                Err(Object::from(ptr).to_string())
+            }
+        }
+    }
+
+    pub fn create_performer(&self) -> Result<Object<PerformerInterfaceVtable>, ()> {
+        unsafe {
+            let ptr = ((**self.ptr).table.create_performer)(self.ptr);
+            if ptr as usize != 0 {
+                Ok(Object::from(ptr))
+            } else {
+                Err(())
+            }
+        }
+    }
+
+    pub fn get_last_build_log(&self) -> String {
+        unsafe {
+            let ptr = ((**self.ptr).table.get_last_build_log)(self.ptr);
+            Object::from(ptr).to_string()
+        }
+    }
+
     pub fn is_loaded(&self) -> bool {
         unsafe { ((**self.ptr).table.is_loaded)(self.ptr) }
     }
@@ -136,7 +172,34 @@ impl Object<EngineInterfaceVtable> {
         unsafe { ((**self.ptr).table.is_linked)(self.ptr) }
     }
 
-    // set_build_settings
+    pub fn generate_code(
+        &self,
+        target_type: &str,
+        options: &str,
+        callback_context: *mut c_void,
+        handle: HandleCodeGenOutput,
+    ) {
+        let target_type = CString::new(target_type).unwrap();
+        let options = CString::new(options).unwrap();
+
+        unsafe {
+            ((**self.ptr).table.generate_code)(
+                self.ptr,
+                target_type.as_ptr(),
+                options.as_ptr(),
+                callback_context,
+                handle,
+            );
+        }
+    }
+
+    pub fn get_available_code_gen_target_types(&self) -> String {
+        unsafe {
+            let ptr = ((**self.ptr).table.get_available_code_gen_target_types)(self.ptr);
+            let cstr = CStr::from_ptr(ptr);
+            cstr.to_str().unwrap().to_owned()
+        }
+    }
 }
 
 fn request_external_variable_function(context: *const c_void, external_variable: *const i8) {

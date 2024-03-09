@@ -3,12 +3,12 @@ use std::ffi::{c_void, CStr, CString};
 use super::*;
 
 #[repr(C)]
-pub struct CacheDatabaseInterface {
+pub struct CacheDatabaseInterfaceVtable {
     store_: unsafe fn(key: *const i8, data_to_save: *const c_void, data_size: u64),
     reload_: unsafe fn(key: *const i8, dest_address: *const c_void, dest_size: u64) -> u64,
 }
 
-impl CacheDatabaseInterface {
+impl CacheDatabaseInterfaceVtable {
     pub fn store(&self, key: &str, data: Vec<u8>) {
         let key = CString::new(key).unwrap();
 
@@ -21,7 +21,5 @@ impl CacheDatabaseInterface {
         }
     }
 
-    pub fn reload(&self, key: &str, data: Vec<u8>) {
-        todo!()
-    }
+    pub fn reload(&self, key: &str, data: Vec<u8>) {}
 }
