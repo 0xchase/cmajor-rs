@@ -6,7 +6,7 @@ type EndpointHandle = u32;
 type HandleOutputEventCallback = unsafe fn (context: *const c_void, EndpointHandle, data_type_index: u32, frame_offset: u32, value_data: *const c_void, value_data_size: u32);
 
 #[repr(C)]
-pub struct PerformerInterface {
+pub struct PerformerInterfaceVtable {
     set_block_size: unsafe fn (num_frames_for_next_block: u32),
     set_input_frames: unsafe fn (EndpointHandle, frame_data: *const c_void, num_frames: u32),
     set_input_value: unsafe fn (EndpointHandle, value_data: *const c_void, num_frames_to_reach_value: u32),
@@ -22,5 +22,3 @@ pub struct PerformerInterface {
     get_latency: unsafe fn (),
     get_runtime_error: unsafe fn () -> *const u8,
 }
-
-type PerformerPtr = *mut PerformerInterface;

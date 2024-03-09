@@ -6,6 +6,8 @@ mod performer;
 mod program;
 
 use core::slice;
+use std::ops::Deref;
+use std::ffi::c_void;
 
 pub use database::*;
 pub use engine_factory::*;
@@ -14,43 +16,80 @@ pub use library::*;
 pub use performer::*;
 pub use program::*;
 
-#[repr(C)]
-pub struct ObjectVtable {
-    add_ref: fn (*const Object) -> i32,
-    release: fn (*const Object) -> i32,
-    get_reference_count: fn(*const Object) -> i32,
+#[repr(transparent)]
+pub struct Object<T> {
+    ptr: *mut *const ObjectVtable<T>
 }
 
-#[repr(C)]
-pub struct Object;
+impl<T> Object<T> {
+    pub fn from(ptr: *mut *const ObjectVtable<T>) -> Self {
+        unsafe {
+            let count = ((**ptr).get_reference_count)(ptr);
+            println!("Starting ref {}", count);
 
-#[repr(C)]
-pub struct ChocStringVtable {
-    object: ObjectVtable,
-    begin: unsafe fn (*const ChocString) -> *mut u8,
-    end: unsafe fn (*const ChocString) -> *mut u8
-}
+            let count = ((**ptr).add_ref)(ptr);
+            println!("Ending ref {}", count);
+        }
 
-#[repr(C)]
-pub struct ChocString {
-    vtable: *const ChocStringVtable
-}
+        Self { ptr }
 
-impl Drop for ChocString {
-    fn drop(&mut self) {
     }
 }
 
-impl ToString for ChocString {
+impl<T> Clone for Object<T> {
+    fn clone(&self) -> Self {
+        unsafe {
+            ((**self.ptr).add_ref)(self.ptr);
+        }
+
+        Self {
+            ptr: self.ptr
+        }
+    }
+}
+
+impl<T> Drop for Object<T> {
+    fn drop(&mut self) {
+        unsafe {
+            ((**self.ptr).release)(self.ptr);
+        }
+    }
+}
+
+/*impl<T> Deref for Object<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe {
+            &(**self.ptr).table
+        }
+    }
+}*/
+
+#[repr(C)]
+pub struct ObjectVtable<T> {
+    add_ref: fn (*mut *const ObjectVtable<T>) -> i32,
+    release: fn (*mut *const ObjectVtable<T>) -> i32,
+    get_reference_count: fn(*mut *const ObjectVtable<T>) -> i32,
+    table: T
+}
+
+#[repr(C)]
+pub struct ChocStringVtable {
+    begin: unsafe fn (*mut *const ObjectVtable<ChocStringVtable>) -> *mut u8,
+    end: unsafe fn (*mut *const ObjectVtable<ChocStringVtable>) -> *mut u8
+}
+
+impl ToString for Object<ChocStringVtable> {
     fn to_string(&self) -> String {
         unsafe {
-            println!("ChocString at {:p}", self);
-            println!("ChocString vtable at {:p}", self.vtable);
-            println!("ChocStringVtable begin at {:p}", (*self.vtable).begin);
-            println!("ChocStringVtable end at {:p}", (*self.vtable).end);
+            /*println!("ChocString at {:p}", self);
+            println!("ChocString vtable at {:p}", self.ptr);
+            println!("ChocStringVtable begin at {:p}", (*self.ptr).table.begin);
+            println!("ChocStringVtable end at {:p}", (*self.ptr).table.end);*/
 
-            let begin = ((*self.vtable).begin)(self);
-            let end = ((*self.vtable).end)(self);
+            let begin = ((**self.ptr).table.begin)(self.ptr);
+            let end = ((**self.ptr).table.end)(self.ptr);
             let len = end as usize - begin as usize;
 
             let slice = slice::from_raw_parts(

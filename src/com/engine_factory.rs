@@ -1,41 +1,40 @@
-use std::ffi::{CStr, CString};
+use std::ffi::{c_void, CStr, CString};
 
 use super::*;
 
 #[repr(C)]
 pub struct EngineFactoryInterfaceVtable {
-    object: ObjectVtable,
     create_engine: unsafe fn (
-        *const EngineFactoryInterface,
+        &Object<Self>,
         engine_creation_options: *const i8
-    ) -> *mut EngineInterface,
+    ) -> *mut *const ObjectVtable<EngineInterfaceVtable>,
     get_name: unsafe fn (
-        *const EngineFactoryInterface
+        &Object<Self>
     ) -> *const i8
 }
 
-#[repr(C)]
-pub struct EngineFactoryInterface {
-    vtable: *const EngineFactoryInterfaceVtable
-}
-
-impl EngineFactoryInterface {
-    pub fn create_engine(&self, engine_creation_options: *const i8) -> *const EngineInterface {
+impl Object<EngineFactoryInterfaceVtable> {
+    pub fn create_engine(&self, engine_creation_options: &str) -> Object<EngineInterfaceVtable> {
+        let options = CString::new(engine_creation_options).unwrap();
         unsafe {
-            let ptr = ((*self.vtable).create_engine)(
-                self as *const EngineFactoryInterface,
-                engine_creation_options
+            let ptr = ((**self.ptr).table.create_engine)(
+                self,
+                std::ptr::null()
             );
 
-            ptr
+            Object::from(ptr)
         }
     }
 
-    pub fn get_name(&self) -> *const i8 {
+    pub fn get_name(&self) -> String {
         unsafe {
-            ((*self.vtable).get_name)(self)
+            let ptr = ((**self.ptr).table.get_name)(self);
+            let string = CStr::from_ptr(ptr);
+
+            string
+                .to_str()
+                .unwrap()
+                .to_string()
         }
     }
 }
-
-type EngineFactoryPtr = *mut EngineFactoryInterface;

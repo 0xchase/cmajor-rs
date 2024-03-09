@@ -12,32 +12,26 @@ pub struct SyntaxTreeOptions {
 
 #[repr(C)]
 pub struct ProgramInterfaceVtable {
-    pub object: ObjectVtable,
     pub parse2: unsafe fn (
-        *const ProgramInterface,
+        *mut *const ObjectVtable<Self>,
         filename: *const i8,
         file_content: *const i8,
         file_content_size: usize
-    ) -> *mut ChocString,
+    ) -> *mut *const ObjectVtable<ChocStringVtable>,
     pub get_syntax_tree: unsafe fn (
-        *const ProgramInterface,
+        *mut *const ObjectVtable<Self>,
         &SyntaxTreeOptions
-    ) -> *mut ChocString
+    ) -> *mut *const ObjectVtable<ChocStringVtable>
 }
 
-#[repr(C)]
-pub struct ProgramInterface {
-    vtable: *const ProgramInterfaceVtable
-}
-
-impl ProgramInterface {
+impl Object<ProgramInterfaceVtable> {
     pub fn parse(&self, filename: &str, file_contents: &str) {
         let filename = CString::new(filename).unwrap();
         let contents = CString::new(file_contents).unwrap();
 
         unsafe {
-            let string = ((*self.vtable).parse2)(
-                self,
+            let string = ((**self.ptr).table.parse2)(
+                self.ptr,
                 filename.as_ptr(),
                 contents.as_ptr(),
                 file_contents.len()
@@ -59,8 +53,8 @@ impl ProgramInterface {
         };
 
         unsafe {
-            let ptr = ((*self.vtable).get_syntax_tree)(self, options);
-            (*ptr).to_string()
+            let ptr = ((**self.ptr).table.get_syntax_tree)(self.ptr, options);
+            Object::from(ptr).to_string()
         }
     }
 }

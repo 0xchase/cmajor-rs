@@ -36,6 +36,7 @@ pub fn main() {
     // Program stuff
 
     let program = library.create_program();
+    
     program.parse("test.cmajor", &contents);
 
     let tree = program.get_syntax_tree("", false, true, true);
@@ -45,12 +46,11 @@ pub fn main() {
 
     let factory = library.create_engine_factory("llvm");
 
-    println!("Engine:");
-    unsafe {
-        let name = (*factory).get_name();
-        let name = CStr::from_ptr(name);
-        println!("Other {}", name.to_str().to_owned().unwrap());
-    }
+    println!("\nEngine factory:");
+    let name = factory.get_name();
+    println!("> Factory name {}", name);
+
+    let engine = factory.create_engine("");
 
     // println!(" > Loaded {}", factory.get_name())
 

@@ -1,4 +1,3 @@
-use std::ffi::c_void;
 use std::ffi::{CStr, CString};
 
 use super::*;
@@ -48,7 +47,7 @@ impl Library {
         }
     }
 
-    pub fn create_program(&self) -> Box<ProgramInterface> {
+    pub fn create_program(&self) -> Object<ProgramInterfaceVtable> {
         let entries = self.get_entry_points();
 
         unsafe {
@@ -56,27 +55,25 @@ impl Library {
 
             if ptr as usize == 0 {
                 panic!("Failed to create program");
-            } else {
-                println!("Program at {:p}", ptr);
-                Box::from_raw(ptr)
             }
+
+            println!("Program at {:p}", ptr);
+            Object::from(ptr)
         }
     }
 
-    pub fn create_engine_factory(&self, option: &str) -> *const EngineFactoryInterface {
+    pub fn create_engine_factory(&self, option: &str) -> Object<EngineFactoryInterfaceVtable> {
         println!("Creating engine factory");
 
         let entries = self.get_entry_points();
         let option = CString::new(option).unwrap();
 
         unsafe {
-            println!("Calling create_engine_factory");
             let ptr = (entries.create_engine_factory)(std::ptr::null());
-
             if ptr as usize == 0 {
                 panic!("Failed to create engine factory");
             } else {
-                ptr
+                Object::from(ptr)
             }
         }
     }
@@ -100,41 +97,7 @@ impl Library {
 #[repr(C)]
 pub struct EntryPoints {
     get_version: unsafe fn () -> *mut i8,
-    create_program: unsafe fn () -> *mut ProgramInterface,
+    create_program: unsafe fn () -> *mut *const ObjectVtable<ProgramInterfaceVtable>,
     get_engine_types: unsafe fn () -> *const i8,
-    create_engine_factory: unsafe fn (*const i8) -> *mut EngineFactoryInterface,
+    create_engine_factory: unsafe fn (*const i8) -> *mut *const ObjectVtable<EngineFactoryInterfaceVtable>,
 }
-
-/*impl Drop for Library {
-    fn drop(&mut self) {
-        todo!()
-    }
-}*/
-
-// Entry Points
-/*fn get_version() -> &'static str {
-    unsafe {
-        let entries: &EntryPoints = get_entry_points();
-
-        println!("Entries at {:p}", entries);
-        println!("Get version at {:p}", entries.get_version);
-        println!("Get program at {:p}", entries.create_program);
-        println!("Get engine types at {:p}", entries.get_engine_types);
-        println!("Create engine factory at {:p}", entries.create_engine_factory);
-
-        let ptr = (entries.get_version)();
-        CStr::from_ptr(ptr)
-            .to_str()
-            .unwrap()
-    }
-}*/
-
-/*fn get_entry_points() -> &'static EntryPoints {
-    unsafe {
-        cmajor_getEntryPointsV9()
-            .as_ref()
-            .unwrap()
-            .as_ref()
-            .unwrap()
-    }
-}*/
