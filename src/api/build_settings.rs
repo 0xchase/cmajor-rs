@@ -13,7 +13,7 @@ const MAX_BLOCK_SIZE: u32 = 1024;
 const MAX_POOL_SIZE: u32 = 50 * 1024 * 1024;
 
 pub struct BuildSettings {
-    settings: serde_json::Value
+    settings: serde_json::Value,
 }
 
 impl BuildSettings {
@@ -36,7 +36,7 @@ impl BuildSettings {
                 .as_f64()
                 .unwrap_or(MAX_FREQUENCY)
                 .clamp(1.0, 1000000.0),
-            None => MAX_FREQUENCY
+            None => MAX_FREQUENCY,
         }
     }
 
@@ -46,7 +46,7 @@ impl BuildSettings {
                 .as_f64()
                 .unwrap_or(MAX_FREQUENCY)
                 .clamp(1.0, 1000000.0),
-            None => 0.0
+            None => 0.0,
         }
     }
 
@@ -56,7 +56,7 @@ impl BuildSettings {
                 .as_u64()
                 .unwrap_or(MAX_BLOCK_SIZE as u64)
                 .clamp(1, 8192) as u32,
-            None => MAX_BLOCK_SIZE
+            None => MAX_BLOCK_SIZE,
         }
     }
 
@@ -66,7 +66,7 @@ impl BuildSettings {
                 .as_u64()
                 .unwrap_or(MAX_STATE_SIZE)
                 .clamp(8192, 1024 * 1024 * 1024 + 1),
-            None => MAX_STATE_SIZE
+            None => MAX_STATE_SIZE,
         }
     }
 
@@ -76,7 +76,7 @@ impl BuildSettings {
                 .as_u64()
                 .unwrap_or(MAX_STACK_SIZE)
                 .clamp(1, 1024 * 1024 * 1024 + 1),
-            None => MAX_STACK_SIZE
+            None => MAX_STACK_SIZE,
         }
     }
 
@@ -86,7 +86,7 @@ impl BuildSettings {
                 .as_u64()
                 .unwrap_or(EVENT_BUFFER_SIZE as u64)
                 .clamp(1, 8192) as u32,
-            None => EVENT_BUFFER_SIZE
+            None => EVENT_BUFFER_SIZE,
         }
     }
 
@@ -96,53 +96,42 @@ impl BuildSettings {
                 .as_u64()
                 .unwrap_or(MAX_POOL_SIZE as u64)
                 .clamp(0, 1024 * 1024 * 1024) as usize,
-            None => MAX_POOL_SIZE as usize
+            None => MAX_POOL_SIZE as usize,
         }
     }
 
     pub fn get_optimization_level(&self) -> i32 {
         match self.settings.get(Self::OPTIMIZATION_LEVEL_MEMBER) {
-            Some(value) => value
-                .as_i64()
-                .unwrap_or(-1)
-                .clamp(-1, 5) as i32,
-            None => -1 
+            Some(value) => value.as_i64().unwrap_or(-1).clamp(-1, 5) as i32,
+            None => -1,
         }
     }
 
     pub fn get_session_id(&self) -> i32 {
         match self.settings.get(Self::SESSION_ID_MEMBER) {
-            Some(value) => value
-                .as_i64()
-                .unwrap_or(0) as i32,
-            None => 0
+            Some(value) => value.as_i64().unwrap_or(0) as i32,
+            None => 0,
         }
     }
 
     pub fn should_ignore_warnings(&self) -> bool {
         match self.settings.get(Self::IGNORE_WARNING_MEMBER) {
-            Some(value) => value
-                .as_bool()
-                .unwrap_or(false),
-            None => false
+            Some(value) => value.as_bool().unwrap_or(false),
+            None => false,
         }
     }
 
     pub fn should_dump_debug_info(&self) -> bool {
         match self.settings.get(Self::DEBUG_MEMBER) {
-            Some(value) => value
-                .as_bool()
-                .unwrap_or(false),
-            None => false
+            Some(value) => value.as_bool().unwrap_or(false),
+            None => false,
         }
     }
 
     pub fn debug_flag_set(&self) -> bool {
         match self.settings.get(Self::DEBUG_MEMBER) {
-            Some(value) => value
-                .as_bool()
-                .unwrap_or(false),
-            None => false
+            Some(value) => value.as_bool().unwrap_or(false),
+            None => false,
         }
     }
 
@@ -152,11 +141,8 @@ impl BuildSettings {
 
     pub fn get_main_processor(&self) -> String {
         match self.settings.get(Self::MAIN_PROCESSOR_MEMBER) {
-            Some(value) => value
-                .as_str()
-                .unwrap_or("")
-                .to_string(),
-            None => String::from("")
+            Some(value) => value.as_str().unwrap_or("").to_string(),
+            None => String::from(""),
         }
     }
 
@@ -294,16 +280,14 @@ impl BuildSettings {
 
 impl From<Value> for BuildSettings {
     fn from(value: Value) -> Self {
-        Self {
-            settings: value
-        }
+        Self { settings: value }
     }
 }
 
 impl From<&str> for BuildSettings {
     fn from(value: &str) -> Self {
         Self {
-            settings: serde_json::from_str(value).unwrap()
+            settings: serde_json::from_str(value).unwrap(),
         }
     }
 }
