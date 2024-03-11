@@ -7,7 +7,7 @@ use api::*;
 use com::*;
 
 pub fn main() {
-    let library = Library::load("cmajor/x64/libCmajPerformer.so");
+    Library::load("cmajor/x64/libCmajPerformer.so");
 
     let path = "test.cmajor";
     let contents = std::fs::read_to_string(path).unwrap();
@@ -16,7 +16,7 @@ pub fn main() {
 
     // ===== Library stuff =====
 
-    let version = library.get_version().to_str().unwrap();
+    let version = Library::get_version().to_str().unwrap();
 
     println!("\nVersion is {}", version);
 
@@ -24,7 +24,7 @@ pub fn main() {
 
     // println!("Size is {}", std::mem::size_of::<ProgramInterfaceVtable>());
     // println!("Size is {}", std::mem::size_of::<ObjectVtable<ProgramInterfaceVtable>>());
-    let program = library.create_program();
+    let program = Library::create_program();
 
     program.parse("test.cmajor", &contents);
 
@@ -34,14 +34,14 @@ pub fn main() {
     // ===== Engine Factory stuff =====
 
     println!("Size is {}", std::mem::size_of::<EntryPoints>());
-    let types = library.get_engine_types();
-    let factory = library.create_engine_factory("llvm");
+    let types = Library::get_engine_types();
+    let factory = Library::create_engine_factory("llvm").unwrap();
     let name = factory.get_name();
     println!("Factory name is {}", name);
 
     // ===== Engine stuff =====
 
-    let engine = factory.create_engine("");
+    let engine = factory.create_engine("sdfkh").unwrap();
 
     let linked = engine.is_linked();
     let loaded = engine.is_loaded();
@@ -66,26 +66,8 @@ pub fn main() {
 
     let performer = engine.create_performer().unwrap();
 
-    /*println!("\nEngine factory:");
-    let name = factory.get_name();
-    println!("> Factory name {}", name);
-
-    let engine = factory.create_engine("");*/
-
-    // println!(" > Loaded {}", factory.get_name())
-
-    // let name = factory.get_name();
-
-    // let engine = factory.create_engine(std::ptr::null());
-
-    // println!("{}", name.to_str().unwrap());
-
-    /*println!("Parsing program");
-    program.parse("Filter.cmajor", &contents);
-
-    println!("Getting syntax tree");
-    let tree = program.get_syntax_tree("", false, false, false);
-    println!("Got syntax tree {}", tree);*/
+    // let engine = Engine::create("llvm").unwrap();
+    // let performer = engine.create_performer().unwrap();
 }
 
 fn handle(
