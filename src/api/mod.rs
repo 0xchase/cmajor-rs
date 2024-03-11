@@ -16,8 +16,6 @@ pub use performer::*;
 pub use program::*;
 pub use source_files::*;
 
-pub struct Value;
-
 pub struct Span<T> {
     value: T,
 }

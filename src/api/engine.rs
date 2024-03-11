@@ -3,6 +3,7 @@ use std::rc::Rc;
 use crate::com::*;
 
 use self::build_settings::BuildSettings;
+use serde_json::Value;
 
 use super::*;
 
@@ -31,7 +32,8 @@ impl Engine {
     }
 
     pub fn get_build_settings(&self) -> BuildSettings {
-        BuildSettings::from_json(&self.engine.get_build_settings())
+        let settings = self.engine.get_build_settings();
+        BuildSettings::from(settings.as_str())
     }
 
     pub fn set_build_settings(&mut self, new_settings: &BuildSettings) {
