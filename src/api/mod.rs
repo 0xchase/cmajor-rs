@@ -19,7 +19,7 @@ pub use source_files::*;
 pub struct Value;
 
 pub struct Span<T> {
-    value: T
+    value: T,
 }
 
 pub struct Type;

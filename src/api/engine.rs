@@ -6,8 +6,8 @@ use self::build_settings::BuildSettings;
 
 use super::*;
 
-type ExternalVariableProviderFn = fn (&ExternalVariable) -> Value;
-type ExternalFunctionProviderFn = fn (&str, &[Type]);
+type ExternalVariableProviderFn = fn(&ExternalVariable) -> Value;
+type ExternalFunctionProviderFn = fn(&str, &[Type]);
 
 pub struct Engine {
     engine: Object<EngineInterfaceVtable>,
@@ -17,9 +17,7 @@ impl Engine {
     pub fn create(engine_type: &str) -> Result<Self, String> {
         if let Ok(factory) = Library::create_engine_factory(engine_type) {
             if let Ok(engine) = factory.create_engine("") {
-                Ok(Self {
-                    engine,
-                })
+                Ok(Self { engine })
             } else {
                 Err(String::from("Error creating engine interface"))
             }
@@ -40,7 +38,12 @@ impl Engine {
         self.engine.set_build_settings(&new_settings.to_json());
     }
 
-    pub fn load(messages: &DiagnosticMessageList, program: &Program, external_variable: ExternalVariableProviderFn, external_function: ExternalFunctionProviderFn) -> bool {
+    pub fn load(
+        messages: &DiagnosticMessageList,
+        program: &Program,
+        external_variable: ExternalVariableProviderFn,
+        external_function: ExternalFunctionProviderFn,
+    ) -> bool {
         todo!()
     }
 
@@ -68,12 +71,18 @@ impl Engine {
         todo!()
     }
 
-    pub fn link(&self, messages: &mut DiagnosticMessageList, cache: &Object<CacheDatabaseInterfaceVtable>) -> bool {
+    pub fn link(
+        &self,
+        messages: &mut DiagnosticMessageList,
+        cache: &Object<CacheDatabaseInterfaceVtable>,
+    ) -> bool {
         if !self.is_loaded() || self.is_linked() {
-            messages.add(DiagnosticMessage::create_error("Program must be loaded but not linked"));
+            messages.add(DiagnosticMessage::create_error(
+                "Program must be loaded but not linked",
+            ));
             return false;
         }
-        
+
         if let Err(message) = &self.engine.link(cache) {
             return messages.add_from_json_string(message);
         }
@@ -91,7 +100,6 @@ impl Engine {
         } else {
             return Err(String::from("Performer creation failed"));
         }
-
     }
 
     pub fn is_loaded(&self) -> bool {
@@ -113,11 +121,10 @@ impl Engine {
     pub fn get_available_code_gen_target_types(&self) -> Vec<String> {
         todo!()
     }
-
 }
 
 pub struct CodeGenOutput {
     generated_code: String,
     main_class_name: String,
-    messages: DiagnosticMessageList
+    messages: DiagnosticMessageList,
 }

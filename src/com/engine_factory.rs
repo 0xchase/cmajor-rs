@@ -12,7 +12,10 @@ pub struct EngineFactoryInterfaceVtable {
 }
 
 impl Object<EngineFactoryInterfaceVtable> {
-    pub fn create_engine(&self, engine_creation_options: &str) -> Result<Object<EngineInterfaceVtable>, String> {
+    pub fn create_engine(
+        &self,
+        engine_creation_options: &str,
+    ) -> Result<Object<EngineInterfaceVtable>, String> {
         let options = CString::new(engine_creation_options).unwrap();
         unsafe {
             let ptr = ((**self.ptr).table.create_engine)(self.ptr, std::ptr::null());

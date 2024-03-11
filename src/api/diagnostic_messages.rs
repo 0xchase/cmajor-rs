@@ -1,6 +1,5 @@
-
 pub struct DiagnosticMessageList {
-    messages: Vec<DiagnosticMessage>
+    messages: Vec<DiagnosticMessage>,
 }
 
 impl DiagnosticMessageList {
@@ -13,9 +12,7 @@ impl DiagnosticMessageList {
     }
 }
 
-pub struct DiagnosticMessage {
-
-}
+pub struct DiagnosticMessage {}
 
 impl DiagnosticMessage {
     pub fn create_error(message: &str) -> Self {

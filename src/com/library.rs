@@ -1,5 +1,8 @@
-use std::{ffi::{CStr, CString}, sync::{Arc, RwLock}};
 use lazy_static::lazy_static;
+use std::{
+    ffi::{CStr, CString},
+    sync::{Arc, RwLock},
+};
 
 use super::*;
 
@@ -22,9 +25,7 @@ impl Library {
     pub fn load(path: &str) -> bool {
         unsafe {
             let library = libloading::Library::new(path).unwrap();
-            *LIBRARY.write().unwrap() = Some(Self {
-                library
-            });
+            *LIBRARY.write().unwrap() = Some(Self { library });
         }
 
         true
@@ -80,7 +81,7 @@ impl Library {
                     .unwrap()
                     .to_owned()
                     .split(" ")
-                    .map(| f | f.to_owned() )
+                    .map(|f| f.to_owned())
                     .collect::<Vec<_>>()
             }
         } else {
@@ -88,7 +89,9 @@ impl Library {
         }
     }
 
-    pub fn create_engine_factory(option: &str) -> Result<Object<EngineFactoryInterfaceVtable>, String> {
+    pub fn create_engine_factory(
+        option: &str,
+    ) -> Result<Object<EngineFactoryInterfaceVtable>, String> {
         let library = &*LIBRARY.read().unwrap();
         if let Some(library) = library {
             println!("Creating engine factory");
@@ -110,7 +113,6 @@ impl Library {
                 } else {
                     Ok(Object::from(ptr))
                 }
-
             }
         } else {
             panic!("Library not loaded");
@@ -121,8 +123,9 @@ impl Library {
         let library = &*LIBRARY.read().unwrap();
         if let Some(library) = library {
             unsafe {
-                let symbol: libloading::Symbol<unsafe extern "C" fn() -> *const *const EntryPoints> =
-                    library.library.get(SYMBOL_NAME).unwrap();
+                let symbol: libloading::Symbol<
+                    unsafe extern "C" fn() -> *const *const EntryPoints,
+                > = library.library.get(SYMBOL_NAME).unwrap();
 
                 (symbol)().as_ref().unwrap().as_ref().unwrap()
             }
