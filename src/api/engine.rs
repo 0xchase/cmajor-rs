@@ -79,9 +79,10 @@ impl Engine {
         cache: &Object<CacheDatabaseInterfaceVtable>,
     ) -> bool {
         if !self.is_loaded() || self.is_linked() {
-            messages.add(DiagnosticMessage::create_error(
+            messages.push(DiagnosticMessage::create_error(
                 "Program must be loaded but not linked",
             ));
+
             return false;
         }
 
@@ -98,7 +99,7 @@ impl Engine {
         }
 
         if let Ok(performer) = self.engine.create_performer() {
-            Ok(Performer(performer))
+            Ok(Performer::from(performer))
         } else {
             return Err(String::from("Performer creation failed"));
         }

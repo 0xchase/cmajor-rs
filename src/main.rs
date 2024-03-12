@@ -17,7 +17,10 @@ pub fn main() {
     // ===== Engine stuff =====
 
     let engine = Engine::create("llvm").unwrap();
-    let performer = engine.create_performer().unwrap();
+    // engine.link(messages, cache);
+    let performer = engine
+        .create_performer()
+        .unwrap();
 }
 
 fn handle(
