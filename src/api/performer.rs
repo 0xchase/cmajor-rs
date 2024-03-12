@@ -37,35 +37,37 @@ impl Performer {
         todo!()
     }
 
-    pub fn copy_output_value<T>(&self, handle: EndpointHandle, dest: &T) {
+    pub fn copy_output_value<T>(&self, handle: EndpointHandle, dest: &mut T) {
+        // self.object.copy_output_value(handle, dest);
         todo!()
     }
 
     pub fn iterate_output_events(&self, handle: EndpointHandle, handler: fn()) {
+        // self.object.iterate_output_events(handle, context, callback)
         todo!()
     }
 
     pub fn advance(&mut self) {
-        todo!()
+        self.object.advance();
     }
 
     pub fn get_x_runs(&self) -> u32 {
-        todo!()
+        self.object.get_x_runs()
     }
 
     pub fn get_maximum_block_size(&self) -> u32 {
-        todo!()
+        self.object.get_maximum_block_size()
     }
 
     pub fn get_event_buffer_size(&self) -> u32 {
-        todo!()
+        self.object.get_event_buffer_size()
     }
 
     pub fn get_latency(&self) -> f64 {
-        todo!()
+        self.object.get_latency()
     }
 
     pub fn get_runtime_error(&self) -> Option<String> {
-        todo!()
+        self.object.get_runtime_error()
     }
 }
