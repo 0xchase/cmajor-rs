@@ -14,7 +14,10 @@ pub fn main() {
 
     println!("{}", contents);
 
-    let program = Program::new();
+    // let list = DiagnosticMessageList::new();
+    let mut program = Program::new();
+
+    // program.parse(path, &contents).;
 
     // ===== Engine stuff =====
 
