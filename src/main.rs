@@ -14,13 +14,29 @@ pub fn main() {
 
     println!("{}", contents);
 
+    let program = Program::new();
+
     // ===== Engine stuff =====
 
+    let id = "hi";
     let engine = Engine::create("llvm").unwrap();
+    let handle = engine.get_endpoint_handle(id).unwrap();
+
     // engine.link(messages, cache);
-    let performer = engine
+    let mut performer = engine
         .create_performer()
         .unwrap();
+
+    let input = &[0.0, 0.0, 0.0, 0.0];
+
+    performer.set_input_frames(handle, input);
+
+    for _ in 0..64 {
+        performer.advance();
+    }
+
+    let output: &mut [f32; 4] = &mut [0.0, 0.0, 0.0, 0.0];
+    performer.copy_output_frames(handle, output);
 }
 
 fn handle(

@@ -25,20 +25,22 @@ pub struct ProgramInterfaceVtable {
 }
 
 impl Object<ProgramInterfaceVtable> {
-    pub fn parse(&self, filename: &str, file_contents: &str) {
+    pub fn parse(&self, filename: &str, file_contents: &str) -> Result<(), String> {
         let filename = CString::new(filename).unwrap();
         let contents = CString::new(file_contents).unwrap();
 
         unsafe {
-            let string = ((**self.ptr).table.parse2)(
+            let ptr = ((**self.ptr).table.parse2)(
                 self.ptr,
                 filename.as_ptr(),
                 contents.as_ptr(),
                 file_contents.len(),
             );
 
-            if string != std::ptr::null_mut() {
-                panic!("Error in parsing");
+            if ptr == std::ptr::null_mut() {
+                Ok(())
+            } else {
+                Err(Object::from(ptr).to_string())
             }
         }
     }

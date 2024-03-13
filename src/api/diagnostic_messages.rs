@@ -96,6 +96,10 @@ impl DiagnosticMessage {
         todo!()
     }
 
+    pub fn from_json(json: &str) -> Self {
+        todo!()
+    }
+
     pub fn is_note(&self) -> bool {
         self.kind == Kind::Note
     }
