@@ -1,10 +1,12 @@
 mod api;
 mod com;
+mod helpers;
 
 use std::ffi::{c_void, CStr, CString};
 
 use api::*;
 use com::*;
+use helpers::*;
 
 pub fn main() {
     Library::load("cmajor/x64/libCmajPerformer.so");
