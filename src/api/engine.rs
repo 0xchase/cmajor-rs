@@ -28,7 +28,8 @@ impl Engine {
     }
 
     pub fn get_engine_types() -> Vec<String> {
-        Library::get_engine_types()
+        // Library::get_engine_types()
+        todo!()
     }
 
     pub fn get_build_settings(&self) -> BuildSettings {
@@ -41,6 +42,7 @@ impl Engine {
     }
 
     pub fn load(
+        &mut self,
         messages: &DiagnosticMessageList,
         program: &Program,
         external_variable: ExternalVariableProviderFn,

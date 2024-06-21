@@ -9,25 +9,33 @@ use com::*;
 use helpers::*;
 
 pub fn main() {
-    Library::load("cmajor/x64/libCmajPerformer.so");
+    // Library::load("cmajor/x64/libCmajPerformer.so");
+    Library::load("./cmajor/build/tools/CmajDLL/Release/libCmajPerformer.dylib");
 
     let path = "test.cmajor";
     let contents = std::fs::read_to_string(path).unwrap();
 
-    println!("{}", contents);
+    // println!("{}", contents);
 
-    // let list = DiagnosticMessageList::new();
+    let mut list = DiagnosticMessageList::new();
     let mut program = Program::new();
+    println!("Created program");
 
-    // program.parse(path, &contents).;
+    program.parse(&mut list, path, &contents);
 
     // ===== Engine stuff =====
 
-    let id = "hi";
-    let engine = Engine::create("llvm").unwrap();
+    let mut messages = DiagnosticMessageList::new();
+    let engine = Engine::create("").unwrap();
+
+    engine.load(&mut messages, &program, None, None);
+
+    let id = "handle_1";
     let handle = engine.get_endpoint_handle(id).unwrap();
 
-    // engine.link(messages, cache);
+    // let cache = CacheDatabase::new();
+
+    // engine.link(&mut messages, cache);
     let mut performer = engine
         .create_performer()
         .unwrap();
@@ -52,4 +60,11 @@ fn handle(
     message_list_json: *const i8,
 ) {
     println!("Generate code callback");
+}
+
+pub fn variable_provider(v: &ExternalVariable) -> Value {
+
+}
+pub fn function_provider(&str, &[Type]) -> Value {
+
 }

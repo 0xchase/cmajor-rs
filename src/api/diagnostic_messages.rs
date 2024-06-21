@@ -39,6 +39,12 @@ pub struct DiagnosticMessageList {
 }
 
 impl DiagnosticMessageList {
+    pub fn new() -> Self {
+        Self {
+            messages: Vec::new()
+        }
+    }
+
     pub fn push(&mut self, message: DiagnosticMessage) {
         self.messages.push(message);
     }
