@@ -15,9 +15,3 @@ pub use external_variables::*;
 pub use performer::*;
 pub use program::*;
 pub use source_files::*;
-
-pub struct Span<T> {
-    value: T,
-}
-
-pub struct Type;

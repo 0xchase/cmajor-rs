@@ -1,13 +1,14 @@
 use std::ffi::CString;
 
 use super::*;
+use crate::choc::*;
 
 #[repr(C)]
 pub struct SyntaxTreeOptions {
-    namespace_or_module: *const i8,
-    include_source_locations: bool,
-    include_comments: bool,
-    include_function_contents: bool,
+    pub namespace_or_module: *const i8,
+    pub include_source_locations: bool,
+    pub include_comments: bool,
+    pub include_function_contents: bool,
 }
 
 #[repr(C)]

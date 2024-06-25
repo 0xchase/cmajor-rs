@@ -1,14 +1,15 @@
-use std::rc::Rc;
+use std::{ffi::c_void, rc::Rc};
 
 use crate::com::*;
 
 use self::build_settings::BuildSettings;
-use serde_json::Value;
 
 use super::*;
 
+use crate::choc::*;
+
 type ExternalVariableProviderFn = fn(&ExternalVariable) -> Value;
-type ExternalFunctionProviderFn = fn(&str, &[Type]);
+type ExternalFunctionProviderFn = fn(*const i8, Span<Type>) -> *const c_void;
 
 pub struct Engine {
     engine: Object<EngineInterfaceVtable>,
@@ -43,12 +44,35 @@ impl Engine {
 
     pub fn load(
         &mut self,
-        messages: &DiagnosticMessageList,
+        messages: &mut DiagnosticMessageList,
         program: &Program,
-        external_variable: ExternalVariableProviderFn,
-        external_function: ExternalFunctionProviderFn,
+        get_external_variable: ExternalVariableProviderFn,
+        get_external_function: ExternalFunctionProviderFn,
     ) -> bool {
-        todo!()
+        if self.engine.is_null() {
+            messages.push(DiagnosticMessage::create_error("missing engine"));
+            return false;
+        }
+
+        let resolver = ExternalResolver::new(
+            self.engine.clone(),
+            get_external_variable,
+            get_external_function,
+        );
+
+        let result = self.engine.load(
+            program.object.clone().unwrap(),
+            &resolver as *const ExternalResolver as *const c_void,
+            ExternalResolver::resolve_variable,
+            &resolver as *const ExternalResolver as *const c_void,
+            ExternalResolver::resolve_function
+        );
+
+        if let Some(result) = result {
+            return messages.add_from_json_string(&result);
+        }
+
+        return true;
     }
 
     pub fn unload(&self) {
@@ -78,7 +102,7 @@ impl Engine {
     pub fn link(
         &self,
         messages: &mut DiagnosticMessageList,
-        cache: &Object<CacheDatabaseInterfaceVtable>,
+        cache: Option<Object<CacheDatabaseInterfaceVtable>>,
     ) -> bool {
         if !self.is_loaded() || self.is_linked() {
             messages.push(DiagnosticMessage::create_error(
@@ -124,6 +148,54 @@ impl Engine {
     }
 
     pub fn get_available_code_gen_target_types(&self) -> Vec<String> {
+        todo!()
+    }
+}
+
+struct ExternalResolver {
+    engine: Object<EngineInterfaceVtable>,
+    get_variable: ExternalVariableProviderFn,
+    get_function: ExternalFunctionProviderFn,
+}
+
+impl ExternalResolver {
+    fn new(
+        engine: Object<EngineInterfaceVtable>,
+        get_variable: ExternalVariableProviderFn,
+        get_function: ExternalFunctionProviderFn,
+    ) -> Self {
+        Self {
+            engine,
+            get_variable,
+            get_function,
+        }
+    }
+
+    fn resolve_variable(context: *const c_void, ext: *const i8) {
+        if !context.is_null() {
+            // let external_variable = ExternalVariable::from_json(ext);
+        } else {
+            // Context is nullptr
+        }
+
+        todo!()
+    }
+
+    fn resolve_function(context: *const c_void, function_name: *const i8, parameter_types: *const i8) {
+        if !context.is_null() {
+            let mut types = Vec::<Type>::new();
+
+            // if parseJSONTypeList(types, parameterTypes)) {
+            //     return context->get_function(functionName, types);
+            // }
+        } else {
+            // Context is nullptr
+        }
+
+        todo!()
+    }
+
+    fn parse_json_type_list(result: &Vec<Type>, json: &str) -> bool {
         todo!()
     }
 }

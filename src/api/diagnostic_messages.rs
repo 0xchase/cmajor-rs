@@ -46,11 +46,34 @@ impl DiagnosticMessageList {
     }
 
     pub fn push(&mut self, message: DiagnosticMessage) {
+        println!("{}", message.to_string());
         self.messages.push(message);
     }
 
     pub fn add_from_json_string(&mut self, json: &str) -> bool {
-        todo!()
+        let mut no_errors = true;
+
+        let v: serde_json::Value = serde_json::from_str(json).unwrap();
+
+        if v.is_array() {
+            for message in v.as_array().unwrap() {
+                let message = DiagnosticMessage::from_json(&message);
+                if message.is_error() {
+                    no_errors = false;
+                }
+
+                self.push(message);
+            }
+        } else {
+            let message = DiagnosticMessage::from_json(&v);
+            if message.is_error() {
+                no_errors = false;
+            }
+
+            self.push(message);
+        }
+
+        return no_errors
     }
 
     pub fn has_errors(&self) -> bool {
@@ -102,8 +125,42 @@ impl DiagnosticMessage {
         todo!()
     }
 
-    pub fn from_json(json: &str) -> Self {
-        todo!()
+    pub fn from_json(json: &serde_json::Value) -> Self {
+        let description = json["description"].as_str().unwrap_or("").to_owned();
+
+        // location.filename
+        // location.source_line
+
+        // location.line_and_column.line
+        // location.line_and_column.column
+
+        let kind = match json["severity"].as_str().unwrap() {
+            "warning" => Kind::Warning,
+            "note" => Kind::Note,
+            "error" => Kind::Error,
+            _ => unreachable!()
+        };
+
+        let category = match json["category"].as_str().unwrap() {
+            "compile" => Category::Compile,
+            "runtime" => Category::Runtime,
+            _ => Category::None
+        };
+
+        Self {
+            location: FullCodeLocation {
+                file_name: String::new(),
+                source_line: String::new(),
+                line_and_column: LineAndColumn
+            },
+            description,
+            kind,
+            category
+        }
+    }
+
+    pub fn from_json_str(json: &str) -> Self {
+        Self::from_json(&serde_json::from_str(json).unwrap())
     }
 
     pub fn is_note(&self) -> bool {
@@ -141,7 +198,7 @@ impl DiagnosticMessage {
     }
 
     pub fn get_full_description(&self) -> String {
-        todo!()
+        self.description.clone()
     }
 
     pub fn get_annotated_source_line(&self) -> String {
@@ -166,7 +223,7 @@ impl DiagnosticMessage {
 
 impl ToString for DiagnosticMessage {
     fn to_string(&self) -> String {
-        todo!()
+        return format!("{} {}: {}", self.get_category().to_uppercase(), self.get_severity().to_uppercase(), self.get_full_description());
     }
 }
 

@@ -1,7 +1,8 @@
 use crate::{DiagnosticMessage, DiagnosticMessageList, Object, ProgramInterfaceVtable, SyntaxTreeOptions};
+use crate::com::Library;
 
 pub struct Program {
-    object: Option<Object<ProgramInterfaceVtable>>
+    pub object: Option<Object<ProgramInterfaceVtable>>,
 }
 
 impl Program {
@@ -16,9 +17,13 @@ impl Program {
     }
 
     pub fn parse(&mut self, messages: &mut DiagnosticMessageList, file_name: &str, file_content: &str) -> bool {
+        if self.object.is_none() {
+            self.object = Some(Library::create_program());
+        }
+
         if let Some(object) = &self.object {
             if let Err(error) = object.parse(file_name, file_content) {
-                messages.push(DiagnosticMessage::from_json(&error));
+                messages.push(DiagnosticMessage::from_json_str(&error));
                 return false;
             }
         }
@@ -26,8 +31,11 @@ impl Program {
         true
     }
 
-    pub fn get_syntax_tree(&self, options: &SyntaxTreeOptions) -> String {
-        todo!()
-        // self.object.get_syntax_tree(namespace_or_module, include_source_locations, include_comments, include_function_contents)
+    pub fn get_syntax_tree(&self, namespace: &str, include_source_locations: bool, include_comments: bool, include_function_contents: bool) -> String {
+        if let Some(object) = &self.object {
+            object.get_syntax_tree(namespace, include_source_locations, include_comments, include_function_contents)
+        } else {
+            String::new()
+        }
     }
 }

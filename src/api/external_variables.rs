@@ -1,7 +1,5 @@
 use serde_json::{json, Value};
 
-use crate::Type;
-
 pub struct ExternalVariable {
     name: String,
     ty: Value,

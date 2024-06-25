@@ -1,12 +1,14 @@
 mod api;
 mod com;
 mod helpers;
+mod choc;
 
 use std::ffi::{c_void, CStr, CString};
 
 use api::*;
 use com::*;
 use helpers::*;
+use choc::*;
 
 pub fn main() {
     // Library::load("cmajor/x64/libCmajPerformer.so");
@@ -17,25 +19,38 @@ pub fn main() {
 
     // println!("{}", contents);
 
-    let mut list = DiagnosticMessageList::new();
-    let mut program = Program::new();
-    println!("Created program");
-
-    program.parse(&mut list, path, &contents);
-
     // ===== Engine stuff =====
 
+    println!("Creating diagnostic message list");
     let mut messages = DiagnosticMessageList::new();
-    let engine = Engine::create("").unwrap();
 
-    engine.load(&mut messages, &program, None, None);
+    println!("Creating engine");
+    let mut engine = Engine::create("").unwrap();
+
+    println!("Creating program");
+    let mut program = Program::new();
+
+    println!("Parsing program");
+    program.parse(&mut messages, path, &contents);
+
+    println!("Getting syntax tree");
+    let tree = program.get_syntax_tree("", true, true, true);
+
+    println!("Syntax tree is {}", tree);
+
+    println!("Loading engine");
+    if !engine.load(&mut messages, &program, get_external_variable, get_external_function) {
+        panic!("Failed to load engine");
+    }
+
+    println!("Linking engine");
+    if !engine.link(&mut messages, None) {
+        panic!("Failed to link engine");
+    }
 
     let id = "handle_1";
     let handle = engine.get_endpoint_handle(id).unwrap();
 
-    // let cache = CacheDatabase::new();
-
-    // engine.link(&mut messages, cache);
     let mut performer = engine
         .create_performer()
         .unwrap();
@@ -62,9 +77,9 @@ fn handle(
     println!("Generate code callback");
 }
 
-pub fn variable_provider(v: &ExternalVariable) -> Value {
-
+pub fn get_external_variable(v: &ExternalVariable) -> Value {
+    todo!()
 }
-pub fn function_provider(&str, &[Type]) -> Value {
-
+pub fn get_external_function(s: *const i8, ts: Span<Type>) -> *const c_void {
+    todo!()
 }

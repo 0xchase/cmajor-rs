@@ -1,11 +1,11 @@
 use std::ffi::{c_void, CStr, CString};
 
 use super::*;
+use crate::choc::*;
 
 // Engine interface
 
 type RequestExternalVariableFn = fn(context: *const c_void, external_variable: *const i8);
-
 type RequestExternalFunctionFn =
     fn(context: *const c_void, function_name: *const i8, function_signature: *const i8);
 
@@ -23,7 +23,7 @@ pub struct EngineInterfaceVtable {
     set_build_settings: unsafe fn(*mut *const ObjectVtable<Self>, settings: *const i8),
     load: unsafe fn(
         *mut *const ObjectVtable<Self>,
-        program: *mut *const ObjectVtable<ProgramInterfaceVtable>,
+        program: Object<ProgramInterfaceVtable>,
         request_variable_context: *const c_void,
         v: RequestExternalVariableFn,
         request_function_context: *const c_void,
@@ -73,23 +73,21 @@ impl Object<EngineInterfaceVtable> {
         }
     }
 
-    pub fn load(&self, program: &Object<ProgramInterfaceVtable>) -> Result<(), String> {
+    pub fn load(&self, program: Object<ProgramInterfaceVtable>, request_variable_context: *const c_void, v: RequestExternalVariableFn, request_function_context: *const c_void, f: RequestExternalFunctionFn) -> Option<String> {
         unsafe {
-            let request_variable_context = std::ptr::null();
-            let request_function_context = std::ptr::null();
             let ptr = ((**self.ptr).table.load)(
                 self.ptr,
-                program.ptr,
+                program,
                 request_variable_context,
-                request_external_variable_function,
+                v,
                 request_function_context,
-                request_external_function_function,
+                f,
             );
 
             if ptr as usize != 0 {
-                Err(Object::from(ptr).to_string())
+                Some(Object::from(ptr).to_string())
             } else {
-                Ok(())
+                None
             }
         }
     }
@@ -134,9 +132,13 @@ impl Object<EngineInterfaceVtable> {
         unsafe { ((**self.ptr).table.get_endpoint_handle)(self.ptr, endpoint_id.as_ptr()) }
     }
 
-    pub fn link(&self, database: &Object<CacheDatabaseInterfaceVtable>) -> Result<(), String> {
+    pub fn link(&self, database: Option<Object<CacheDatabaseInterfaceVtable>>) -> Result<(), String> {
         unsafe {
-            let ptr = ((**self.ptr).table.link)(self.ptr, database.ptr);
+            let ptr = if let Some(database) = database {
+                ((**self.ptr).table.link)(self.ptr, database.ptr)
+            } else {
+                ((**self.ptr).table.link)(self.ptr, std::ptr::null_mut())
+            };
 
             if ptr as usize == 0 {
                 Ok(())
@@ -202,7 +204,7 @@ impl Object<EngineInterfaceVtable> {
     }
 }
 
-fn request_external_variable_function(context: *const c_void, external_variable: *const i8) {
+/*fn request_external_variable_function(context: *const c_void, external_variable: *const i8) {
     panic!("Requesting external variable");
 }
 
@@ -212,6 +214,6 @@ fn request_external_function_function(
     external_variable: *const i8,
 ) {
     panic!("Requesting external function");
-}
+}*/
 
 pub type EndpointHandle = u32;

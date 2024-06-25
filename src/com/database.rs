@@ -21,5 +21,7 @@ impl CacheDatabaseInterfaceVtable {
         }
     }
 
-    pub fn reload(&self, key: &str, data: Vec<u8>) {}
+    pub fn reload(&self, key: &str, data: Vec<u8>) {
+        todo!()
+    }
 }
