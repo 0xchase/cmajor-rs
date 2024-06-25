@@ -17,18 +17,40 @@ pub struct BuildSettings {
 }
 
 impl BuildSettings {
-    const MAX_FREQUENCY_MEMBER: &str = "maxFrequency";
-    const FREQUENCY_MEMBER: &str = "frequency";
-    const MAX_BLOCK_SIZE_MEMBER: &str = "maxBlockSize";
-    const MAX_STATE_SIZE_MEMBER: &str = "maxStateSize";
-    const MAX_STACK_SIZE_MEMBER: &str = "maxStackSize";
-    const EVENT_BUFFER_SIZE_MEMBER: &str = "eventBufferSize";
-    const MAX_POOL_SIZE_MEMBER: &str = "maxAllocPoolSize";
-    const OPTIMIZATION_LEVEL_MEMBER: &str = "optimisationLevel";
-    const SESSION_ID_MEMBER: &str = "sessionID";
-    const IGNORE_WARNING_MEMBER: &str = "ignoreWarnings";
-    const DEBUG_MEMBER: &str = "debug";
-    const MAIN_PROCESSOR_MEMBER: &str = "mainProcessor";
+    const MAX_FREQUENCY_MEMBER: &'static str = "maxFrequency";
+    const FREQUENCY_MEMBER: &'static str = "frequency";
+    const MAX_BLOCK_SIZE_MEMBER: &'static str = "maxBlockSize";
+    const MAX_STATE_SIZE_MEMBER: &'static str = "maxStateSize";
+    const MAX_STACK_SIZE_MEMBER: &'static str = "maxStackSize";
+    const EVENT_BUFFER_SIZE_MEMBER: &'static str = "eventBufferSize";
+    const MAX_POOL_SIZE_MEMBER: &'static str = "maxAllocPoolSize";
+    const OPTIMIZATION_LEVEL_MEMBER: &'static str = "optimisationLevel";
+    const SESSION_ID_MEMBER: &'static str = "sessionID";
+    const IGNORE_WARNING_MEMBER: &'static str = "ignoreWarnings";
+    const DEBUG_MEMBER: &'static str = "debug";
+    const MAIN_PROCESSOR_MEMBER: &'static str = "mainProcessor";
+
+    pub fn new() -> Self {
+        let mut map = Map::new();
+
+        map.insert(Self::MAX_FREQUENCY_MEMBER.to_string(), Value::from(MAX_FREQUENCY));
+        map.insert(Self::MAX_STATE_SIZE_MEMBER.to_string(), Value::from(MAX_STATE_SIZE));
+        map.insert(Self::MAX_STACK_SIZE_MEMBER.to_string(), Value::from(MAX_STACK_SIZE));
+        map.insert(Self::EVENT_BUFFER_SIZE_MEMBER.to_string(), Value::from(EVENT_BUFFER_SIZE));
+        map.insert(Self::MAX_BLOCK_SIZE_MEMBER.to_string(), Value::from(MAX_BLOCK_SIZE));
+        map.insert(Self::MAX_POOL_SIZE_MEMBER.to_string(), Value::from(MAX_POOL_SIZE));
+
+        map.insert(Self::FREQUENCY_MEMBER.to_string(), Value::from(44100.0));
+        /*map[Self::OPTIMIZATION_LEVEL_MEMBER] = Value::from(44100.0);
+        map[Self::SESSION_ID_MEMBER] = Value::from(44100.0);
+        map[Self::IGNORE_WARNING_MEMBER] = Value::from(44100.0);
+        map[Self::DEBUG_MEMBER] = Value::from(44100.0);
+        map[Self::MAIN_PROCESSOR_MEMBER] = Value::from(44100.0);*/
+
+        Self {
+            settings: Value::Object(map),
+        }
+    }
 
     pub fn get_max_frequency(&self) -> f64 {
         match self.settings.get(Self::MAX_FREQUENCY_MEMBER) {
@@ -206,6 +228,7 @@ impl BuildSettings {
     }
 
     pub fn to_json(&self) -> String {
+        println!("Settings are {}", self.settings.to_string());
         self.settings.to_string()
     }
 

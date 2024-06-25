@@ -113,7 +113,7 @@ impl Engine {
         }
 
         if let Err(message) = &self.engine.link(cache) {
-            println!("Error linking engine: {}", message);
+            // println!("Error linking engine: {}", message);
             return messages.add_from_json_string(message);
         }
 

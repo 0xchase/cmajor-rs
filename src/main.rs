@@ -43,28 +43,43 @@ pub fn main() {
         panic!("Failed to load engine");
     }
 
+    println!("Setting build settings");
+    let settings = BuildSettings::new();
+    engine.set_build_settings(&settings);
+
     println!("Linking engine");
     if !engine.link(&mut messages, None) {
         panic!("Failed to link engine");
     }
 
+    println!("Getting endpoint handle");
     let id = "handle_1";
     let handle = engine.get_endpoint_handle(id).unwrap();
+    println!("Handle is {}", handle);
 
+    println!("Create performer");
     let mut performer = engine
         .create_performer()
         .unwrap();
 
-    let input = &[0.0, 0.0, 0.0, 0.0];
+    println!("Set block size");
+    performer.set_block_size(64);
 
+    let input = &[0.0; 64];
+
+    println!("Set input frames");
     performer.set_input_frames(handle, input);
 
+    println!("Advancing");
     for _ in 0..64 {
         performer.advance();
     }
 
+    println!("Copying output frames");
     let output: &mut [f32; 4] = &mut [0.0, 0.0, 0.0, 0.0];
     performer.copy_output_frames(handle, output);
+
+    println!("Done");
 }
 
 fn handle(
