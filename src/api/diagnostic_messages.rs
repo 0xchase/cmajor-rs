@@ -1,4 +1,7 @@
-pub struct LineAndColumn;
+pub struct LineAndColumn {
+    line: u32,
+    column: u32
+}
 pub struct CodeLocation;
 pub struct SourceFile;
 
@@ -126,13 +129,16 @@ impl DiagnosticMessage {
     }
 
     pub fn from_json(json: &serde_json::Value) -> Self {
-        let description = json["description"].as_str().unwrap_or("").to_owned();
+        let description = json["message"].as_str().unwrap_or("").to_owned();
 
-        // location.filename
-        // location.source_line
-
-        // location.line_and_column.line
-        // location.line_and_column.column
+        let location = FullCodeLocation {
+            file_name: json["fileName"].to_string(),
+            source_line: json["sourceLine"].to_string(),
+            line_and_column: LineAndColumn {
+                line: json["sourceLine"].as_i64().unwrap_or(0) as u32,
+                column: json["columnNumber"].as_i64().unwrap_or(0) as u32
+            }
+        };
 
         let kind = match json["severity"].as_str().unwrap() {
             "warning" => Kind::Warning,
@@ -148,11 +154,7 @@ impl DiagnosticMessage {
         };
 
         Self {
-            location: FullCodeLocation {
-                file_name: String::new(),
-                source_line: String::new(),
-                line_and_column: LineAndColumn
-            },
+            location,
             description,
             kind,
             category
@@ -223,7 +225,7 @@ impl DiagnosticMessage {
 
 impl ToString for DiagnosticMessage {
     fn to_string(&self) -> String {
-        return format!("{} {}: {}", self.get_category().to_uppercase(), self.get_severity().to_uppercase(), self.get_full_description());
+        return format!("{} {} in file {} line {}: {}", self.get_category(), self.get_severity(), self.location.file_name, self.location.line_and_column.line, self.get_full_description());
     }
 }
 

@@ -36,7 +36,7 @@ impl Library {
         if let Some(library) = library {
             let entries = library.get_entry_points();
             unsafe {
-                CStr::from_ptr((entries.get_version)())
+                CStr::from_ptr(((**entries).get_version)(entries))
             }
         } else {
             panic!("Library not loaded");
@@ -49,7 +49,7 @@ impl Library {
             let entries = library.get_entry_points();
 
             unsafe {
-                let ptr = (entries.create_program)();
+                let ptr = ((**entries).create_program)(entries);
 
                 if ptr as usize == 0 {
                     panic!("Failed to create program");
@@ -67,7 +67,7 @@ impl Library {
         if let Some(library) = library {
             let entries = library.get_entry_points();
             unsafe {
-                let ptr = (entries.get_engine_types)();
+                let ptr = ((**entries).get_engine_types)(entries);
                 /*CStr::from_ptr(ptr)
                     .to_str()
                     .unwrap()
@@ -93,7 +93,7 @@ impl Library {
             let entries = library.get_entry_points();
             unsafe {
                 println!("INTENTIONALLY EXTRA ARGUMENT");
-                let ptr = (entries.create_engine_factory)(std::ptr::null(), std::ptr::null());
+                let ptr = ((**entries).create_engine_factory)(entries, std::ptr::null());
                 if ptr.is_null() {
                     Err("Failed to create engine factory".to_owned())
                 } else {
@@ -105,14 +105,14 @@ impl Library {
         }
     }
 
-    fn get_entry_points(&self) -> EntryPoints {
+    fn get_entry_points(&self) -> *mut *const EntryPoints {
         type Entry<'a> = libloading::Symbol<'a, unsafe extern "C" fn() -> *mut *const EntryPoints>;
 
         let library = &*LIBRARY.read().unwrap();
         if let Some(library) = library {
             unsafe {
                 let symbol: Entry = library.library.get(SYMBOL_NAME).unwrap();
-                return **(symbol)();
+                return (symbol)();
             }
         } else {
             panic!("Library not loaded");
@@ -123,8 +123,8 @@ impl Library {
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct EntryPoints {
-    get_version: unsafe extern "C" fn() -> *mut i8,
-    create_program: unsafe extern "C" fn() -> *mut *const ObjectVtable<ProgramInterfaceVtable>,
-    get_engine_types: unsafe extern "C" fn() -> *const i8,
-    create_engine_factory: unsafe extern "C" fn(*const i8, *const i8) -> *mut *const ObjectVtable<EngineFactoryInterfaceVtable>,
+    get_version: unsafe extern "C" fn(*mut *const Self) -> *mut i8,
+    create_program: unsafe extern "C" fn(*mut *const Self) -> *mut *const ObjectVtable<ProgramInterfaceVtable>,
+    get_engine_types: unsafe extern "C" fn(*mut *const Self) -> *const i8,
+    create_engine_factory: unsafe extern "C" fn(*mut *const Self, *const i8) -> *mut *const ObjectVtable<EngineFactoryInterfaceVtable>,
 }
