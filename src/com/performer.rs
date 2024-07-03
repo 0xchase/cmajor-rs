@@ -38,7 +38,7 @@ pub struct PerformerInterfaceVtable {
     copy_output_frames: unsafe fn(
         *mut *const ObjectVtable<Self>,
         EndpointHandle,
-        dest: *const c_void,
+        dest: *mut c_void,
         num_frames_to_copy: u32,
     ),
     iterate_output_evens: unsafe fn(
@@ -114,7 +114,7 @@ impl Object<PerformerInterfaceVtable> {
     pub fn copy_output_frames(
         &self,
         handle: EndpointHandle,
-        dest: *const c_void,
+        dest: *mut c_void,
         num_frames_to_copy: u32,
     ) {
         unsafe {

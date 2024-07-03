@@ -3,7 +3,7 @@ mod com;
 mod helpers;
 mod choc;
 
-use std::ffi::{c_void, CStr, CString};
+use std::{ffi::{c_void, CStr, CString}};
 
 use api::*;
 use com::*;
@@ -11,8 +11,8 @@ use helpers::*;
 use choc::*;
 
 pub fn main() {
-    // Library::load("cmajor/x64/libCmajPerformer.so");
-    Library::load("./cmajor/build/tools/CmajDLL/Release/libCmajPerformer.dylib");
+    Library::load("cmajor/x64/libCmajPerformer.so");
+    // Library::load("./cmajor/build/tools/CmajDLL//libCmajPerformer.dylib");
 
     let path = "test.cmajor";
     let contents = std::fs::read_to_string(path).unwrap();
@@ -36,7 +36,7 @@ pub fn main() {
     println!("Getting syntax tree");
     let tree = program.get_syntax_tree("", true, true, true);
 
-    println!("Syntax tree is {}", tree);
+    // println!("Syntax tree is {}", tree);
 
     println!("Loading engine");
     if !engine.load(&mut messages, &program, get_external_variable, get_external_function) {
@@ -52,10 +52,15 @@ pub fn main() {
         panic!("Failed to link engine");
     }
 
-    println!("Getting endpoint handle");
-    let id = "handle_1";
-    let handle = engine.get_endpoint_handle(id).unwrap();
-    println!("Handle is {}", handle);
+    let endpoints = engine.get_input_endpoints();
+    for endpoint in endpoints {
+        println!(" > Found input handle {}", endpoint.id);
+    }
+
+    let endpoints = engine.get_output_endpoints();
+    for endpoint in endpoints {
+        println!(" > Found output handle {}", endpoint.id);
+    }
 
     println!("Create performer");
     let mut performer = engine
@@ -63,21 +68,32 @@ pub fn main() {
         .unwrap();
 
     println!("Set block size");
-    performer.set_block_size(64);
+    const BLOCK_SIZE: usize = 64;
+    performer.set_block_size(BLOCK_SIZE as u32);
 
-    let input = &[0.0; 64];
+    // ===========================
+
+    println!("Getting endpoint handle");
+    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
+    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
+    println!("Got handles {} {}", in_handle, out_handle);
+
+    let input = &[0.0; BLOCK_SIZE];
 
     println!("Set input frames");
-    performer.set_input_frames(handle, input);
+    performer.set_input_frames(in_handle, input);
 
     println!("Advancing");
-    for _ in 0..64 {
+    for _ in 0..BLOCK_SIZE {
         performer.advance();
     }
 
     println!("Copying output frames");
-    let output: &mut [f32; 4] = &mut [0.0, 0.0, 0.0, 0.0];
-    performer.copy_output_frames(handle, output);
+
+    let output = &mut [0.0; BLOCK_SIZE];
+    performer.copy_output_frames(out_handle, output);
+
+    println!("Output frames {:?}", output);
 
     println!("Done");
 }

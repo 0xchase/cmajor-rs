@@ -34,7 +34,7 @@ impl Performer {
     }
 
     pub fn copy_output_frames(&self, handle: EndpointHandle, dest: &mut [f32]) {
-        todo!()
+        unsafe { self.object.copy_output_frames(handle, dest.as_mut_ptr() as *mut c_void, dest.len() as u32) }
     }
 
     pub fn copy_output_value<T>(&self, handle: EndpointHandle, dest: &mut T) {

@@ -22,6 +22,12 @@ pub enum EndpointPurpose {
 
 pub struct EndpointDetailsList;
 
+impl EndpointDetailsList {
+    pub fn from_json(value: Value, is_input: bool) -> Self {
+        todo!()
+    }
+}
+
 pub struct EndpointId {
     id: String
 }
@@ -34,17 +40,17 @@ impl EndpointId {
     }
 }
 
-impl ToString for EndpointId {
-    fn to_string(&self) -> String {
-        self.id.clone()
+impl std::fmt::Display for EndpointId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.id)
     }
 }
 
 pub struct EndpointDetails {
-    id: EndpointId,
-    ty: EndpointType,
-    is_input: bool,
+    pub id: EndpointId,
+    pub ty: EndpointType,
+    pub is_input: bool,
     // data_types: Vector<Type,
-    annotation: Value,
-    location: String
+    pub annotation: serde_json::Value,
+    pub location: String
 }

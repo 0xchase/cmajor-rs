@@ -79,12 +79,64 @@ impl Engine {
         self.engine.unload();
     }
 
-    pub fn get_input_endpoints(&self) -> EndpointDetailsList {
-        todo!()
+    pub fn get_input_endpoints(&self) -> Vec<EndpointDetails> {
+        let details = self.get_program_details();
+        let v = &details["inputs"];
+
+        let mut endpoints = Vec::new();
+        for v in v.as_array().unwrap() {
+            let id = v["endpointID"].as_str().unwrap().to_string();
+            let id = EndpointId::create(id);
+
+            let ty = match v["endpointType"].as_str().unwrap() {
+                "stream" => EndpointType::Stream,
+                "value" => EndpointType::Value,
+                "event" => EndpointType::Event,
+                _ => unreachable!(),
+            };
+
+            let endpoint = EndpointDetails {
+                id,
+                ty,
+                is_input: true,
+                annotation: serde_json::Value::from(String::new()),
+                location: String::new()
+            };
+
+            endpoints.push(endpoint);
+        }
+
+        return endpoints;
     }
 
-    pub fn get_output_endpoints(&self) -> EndpointDetailsList {
-        todo!()
+    pub fn get_output_endpoints(&self) -> Vec<EndpointDetails> {
+        let details = self.get_program_details();
+        let v = &details["outputs"];
+
+        let mut endpoints = Vec::new();
+        for v in v.as_array().unwrap() {
+            let id = v["endpointID"].as_str().unwrap().to_string();
+            let id = EndpointId::create(id);
+
+            let ty = match v["endpointType"].as_str().unwrap() {
+                "stream" => EndpointType::Stream,
+                "value" => EndpointType::Value,
+                "event" => EndpointType::Event,
+                _ => unreachable!(),
+            };
+
+            let endpoint = EndpointDetails {
+                id,
+                ty,
+                is_input: true,
+                annotation: serde_json::Value::from(String::new()),
+                location: String::new()
+            };
+
+            endpoints.push(endpoint);
+        }
+
+        return endpoints;
     }
 
     pub fn get_endpoint_handle(&self, endpoint_id: &str) -> Result<EndpointHandle, String> {
@@ -95,8 +147,13 @@ impl Engine {
         }
     }
 
-    pub fn get_program_details(&self) -> Value {
-        todo!()
+    pub fn get_program_details(&self) -> serde_json::Value {
+        if !self.is_loaded() {
+            panic!("Should be loaded");
+        }
+
+        let details = self.engine.get_program_details().unwrap();
+        serde_json::from_str(&details).unwrap()
     }
 
     pub fn link(
