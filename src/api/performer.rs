@@ -3,6 +3,7 @@ use std::ffi::c_void;
 use crate::EndpointHandle;
 use crate::Object;
 use crate::PerformerInterfaceVtable;
+use crate::CmajResult;
 
 pub struct Performer {
     object: Object<PerformerInterfaceVtable>
@@ -33,8 +34,8 @@ impl Performer {
         todo!()
     }
 
-    pub fn copy_output_frames(&self, handle: EndpointHandle, dest: &mut [f32]) {
-        unsafe { self.object.copy_output_frames(handle, dest.as_mut_ptr() as *mut c_void, dest.len() as u32) }
+    pub fn copy_output_frames(&self, handle: EndpointHandle, dest: &mut [f32]) -> CmajResult {
+        self.object.copy_output_frames(handle, dest.as_mut_ptr() as *mut c_void, dest.len() as u32)
     }
 
     pub fn copy_output_value<T>(&self, handle: EndpointHandle, dest: &mut T) {
@@ -47,8 +48,8 @@ impl Performer {
         todo!()
     }
 
-    pub fn advance(&mut self) {
-        self.object.advance();
+    pub fn advance(&mut self) -> CmajResult {
+        self.object.advance()
     }
 
     pub fn get_x_runs(&self) -> u32 {

@@ -1,6 +1,6 @@
 processor GainProcessor
 {
-    input  stream float in_1;    // declare an input and output stream of floats
+    input  stream float in_1 [[ name: "input 1" ]];    // declare an input and output stream of floats
     output stream float out_1;
 
     void main()

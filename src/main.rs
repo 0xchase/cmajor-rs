@@ -47,6 +47,12 @@ pub fn main() {
     let settings = BuildSettings::new();
     engine.set_build_settings(&settings);
 
+    println!("Getting endpoint handle");
+    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
+    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
+    println!("Got handles {} {}", in_handle, out_handle);
+
+
     println!("Linking engine");
     if !engine.link(&mut messages, None) {
         panic!("Failed to link engine");
@@ -73,29 +79,35 @@ pub fn main() {
 
     // ===========================
 
-    println!("Getting endpoint handle");
-    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
-    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
-    println!("Got handles {} {}", in_handle, out_handle);
-
-    let input = &[0.0; BLOCK_SIZE];
+    let input = &[1.0; BLOCK_SIZE];
+    let output = &mut [0.0; BLOCK_SIZE];
 
     println!("Set input frames");
     performer.set_input_frames(in_handle, input);
 
-    println!("Advancing");
+    println!("Advancing {} frames", BLOCK_SIZE);
     for _ in 0..BLOCK_SIZE {
-        performer.advance();
+        match  performer.advance() {
+            CmajResult::Ok => (),
+            CmajResult::InvalidEndpointHandle => panic!("Invalid endpoint handle"),
+            CmajResult::InvalidBlockSize => panic!("Invalid block size"),
+            CmajResult::TypeIndexOutOfRange => panic!("Type index out of range"),
+        }
     }
 
-    println!("Copying output frames");
+    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
+    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
+    println!("Got handles {} {}", in_handle, out_handle);
 
-    let output = &mut [0.0; BLOCK_SIZE];
-    performer.copy_output_frames(out_handle, output);
+    println!("Copying output frames");
+    match performer.copy_output_frames(out_handle, output) {
+        CmajResult::Ok => (),
+        CmajResult::InvalidEndpointHandle => panic!("Invalid endpoint handle"),
+        CmajResult::InvalidBlockSize => panic!("Invalid block size"),
+        CmajResult::TypeIndexOutOfRange => panic!("Type index out of range"),
+    }
 
     println!("Output frames {:?}", output);
-
-    println!("Done");
 }
 
 fn handle(

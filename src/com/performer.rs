@@ -20,7 +20,7 @@ pub struct PerformerInterfaceVtable {
         EndpointHandle,
         frame_data: *const c_void,
         num_frames: u32,
-    ),
+    ) -> CmajResult,
     set_input_value: unsafe fn(
         *mut *const ObjectVtable<Self>,
         EndpointHandle,
@@ -40,14 +40,15 @@ pub struct PerformerInterfaceVtable {
         EndpointHandle,
         dest: *mut c_void,
         num_frames_to_copy: u32,
-    ),
+    ) -> CmajResult,
     iterate_output_evens: unsafe fn(
         *mut *const ObjectVtable<Self>,
         EndpointHandle,
         context: *const c_void,
         HandleOutputEventCallback,
     ),
-    advance: unsafe fn(*mut *const ObjectVtable<Self>),
+    reset: unsafe fn(*mut *const ObjectVtable<Self>) -> CmajResult,
+    advance: unsafe fn(*mut *const ObjectVtable<Self>) -> CmajResult,
     get_string_for_handle: unsafe fn(
         *mut *const ObjectVtable<Self>,
         handle: u32,
@@ -72,9 +73,9 @@ impl Object<PerformerInterfaceVtable> {
         handle: EndpointHandle,
         frame_data: *const c_void,
         num_frames: u32,
-    ) {
+    ) -> CmajResult {
         unsafe {
-            ((**self.ptr).table.set_input_frames)(self.ptr, handle, frame_data, num_frames);
+            ((**self.ptr).table.set_input_frames)(self.ptr, handle, frame_data, num_frames)
         }
     }
 
@@ -116,9 +117,9 @@ impl Object<PerformerInterfaceVtable> {
         handle: EndpointHandle,
         dest: *mut c_void,
         num_frames_to_copy: u32,
-    ) {
+    ) -> CmajResult {
         unsafe {
-            ((**self.ptr).table.copy_output_frames)(self.ptr, handle, dest, num_frames_to_copy);
+            ((**self.ptr).table.copy_output_frames)(self.ptr, handle, dest, num_frames_to_copy)
         }
     }
 
@@ -133,9 +134,15 @@ impl Object<PerformerInterfaceVtable> {
         }
     }
 
-    pub fn advance(&self) {
+    pub fn reset(&mut self) -> CmajResult {
         unsafe {
-            ((**self.ptr).table.advance)(self.ptr);
+            ((**self.ptr).table.reset)(self.ptr)
+        }
+    }
+
+    pub fn advance(&mut self) -> CmajResult {
+        unsafe {
+            ((**self.ptr).table.advance)(self.ptr)
         }
     }
 
