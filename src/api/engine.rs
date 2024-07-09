@@ -81,62 +81,12 @@ impl Engine {
 
     pub fn get_input_endpoints(&self) -> Vec<EndpointDetails> {
         let details = self.get_program_details();
-        let v = &details["inputs"];
-
-        let mut endpoints = Vec::new();
-        for v in v.as_array().unwrap() {
-            let id = v["endpointID"].as_str().unwrap().to_string();
-            let id = EndpointId::create(id);
-
-            let ty = match v["endpointType"].as_str().unwrap() {
-                "stream" => EndpointType::Stream,
-                "value" => EndpointType::Value,
-                "event" => EndpointType::Event,
-                _ => unreachable!(),
-            };
-
-            let endpoint = EndpointDetails {
-                id,
-                ty,
-                is_input: true,
-                annotation: serde_json::Value::from(String::new()),
-                location: String::new()
-            };
-
-            endpoints.push(endpoint);
-        }
-
-        return endpoints;
+        parse_endpoint_details(&details["inputs"], true)
     }
 
     pub fn get_output_endpoints(&self) -> Vec<EndpointDetails> {
         let details = self.get_program_details();
-        let v = &details["outputs"];
-
-        let mut endpoints = Vec::new();
-        for v in v.as_array().unwrap() {
-            let id = v["endpointID"].as_str().unwrap().to_string();
-            let id = EndpointId::create(id);
-
-            let ty = match v["endpointType"].as_str().unwrap() {
-                "stream" => EndpointType::Stream,
-                "value" => EndpointType::Value,
-                "event" => EndpointType::Event,
-                _ => unreachable!(),
-            };
-
-            let endpoint = EndpointDetails {
-                id,
-                ty,
-                is_input: true,
-                annotation: serde_json::Value::from(String::new()),
-                location: String::new()
-            };
-
-            endpoints.push(endpoint);
-        }
-
-        return endpoints;
+        parse_endpoint_details(&details["outputs"], false)
     }
 
     pub fn get_endpoint_handle(&self, endpoint_id: &str) -> Result<EndpointHandle, String> {
@@ -208,6 +158,58 @@ impl Engine {
     pub fn get_available_code_gen_target_types(&self) -> Vec<String> {
         todo!()
     }
+}
+
+pub fn parse_endpoint_details(v: &serde_json::Value, is_input: bool) -> Vec<EndpointDetails> {
+    let mut endpoints = Vec::new();
+    // println!("{}", v);
+    for v in v.as_array().unwrap() {
+        let id = v["endpointID"].as_str().unwrap().to_string();
+        let id = EndpointId::create(id);
+        let mut types = Vec::new();
+
+        let ty = match v["endpointType"].as_str().unwrap() {
+            "stream" => EndpointType::Stream,
+            "value" => EndpointType::Value,
+            "event" => EndpointType::Event,
+            _ => unreachable!(),
+        };
+
+        let data_types = &v["dataTypes"];
+
+        if data_types.is_array() {
+            let arr = data_types.as_array().unwrap();
+            for i in 0..arr.len() {
+                let item = &arr[i];
+                todo!();
+            }
+        } else {
+            types.push(Type::from(&v["dataType"]));
+        }
+
+        let mut annotation = None;
+        if let Some(ann) = v.get("annotation") {
+            annotation = Some(ann.clone());
+        }
+
+        let mut location = None;
+        if let Some(loc) = v.get("source") {
+            location = Some(loc.to_string());
+        }
+
+        let endpoint = EndpointDetails {
+            id,
+            ty,
+            types,
+            is_input,
+            annotation,
+            location
+        };
+
+        endpoints.push(endpoint);
+    }
+
+    return endpoints;
 }
 
 struct ExternalResolver {

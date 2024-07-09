@@ -12,12 +12,9 @@ use choc::*;
 
 pub fn main() {
     Library::load("cmajor/x64/libCmajPerformer.so");
-    // Library::load("./cmajor/build/tools/CmajDLL//libCmajPerformer.dylib");
 
-    let path = "test.cmajor";
+    let path = "test_2.cmajor";
     let contents = std::fs::read_to_string(path).unwrap();
-
-    // println!("{}", contents);
 
     // ===== Engine stuff =====
 
@@ -33,9 +30,8 @@ pub fn main() {
     println!("Parsing program");
     program.parse(&mut messages, path, &contents);
 
-    println!("Getting syntax tree");
-    let tree = program.get_syntax_tree("", true, true, true);
-
+    // println!("Getting syntax tree");
+    // let tree = program.get_syntax_tree("", true, true, true);
     // println!("Syntax tree is {}", tree);
 
     println!("Loading engine");
@@ -47,25 +43,24 @@ pub fn main() {
     let settings = BuildSettings::new();
     engine.set_build_settings(&settings);
 
-    println!("Getting endpoint handle");
-    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
-    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
-    println!("Got handles {} {}", in_handle, out_handle);
-
-
-    println!("Linking engine");
-    if !engine.link(&mut messages, None) {
-        panic!("Failed to link engine");
-    }
-
     let endpoints = engine.get_input_endpoints();
     for endpoint in endpoints {
-        println!(" > Found input handle {}", endpoint.id);
+        println!(" > Found input handle {} {}", endpoint.id, endpoint.annotation.unwrap_or(serde_json::Value::String(String::new())));
     }
 
     let endpoints = engine.get_output_endpoints();
     for endpoint in endpoints {
         println!(" > Found output handle {}", endpoint.id);
+    }
+
+    println!("Getting endpoint handle");
+    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
+    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
+    println!("Got handles {} {}", in_handle, out_handle);
+
+    println!("Linking engine");
+    if !engine.link(&mut messages, None) {
+        panic!("Failed to link engine");
     }
 
     println!("Create performer");
@@ -94,10 +89,6 @@ pub fn main() {
             CmajResult::TypeIndexOutOfRange => panic!("Type index out of range"),
         }
     }
-
-    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
-    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
-    println!("Got handles {} {}", in_handle, out_handle);
 
     println!("Copying output frames");
     match performer.copy_output_frames(out_handle, output) {
