@@ -57,6 +57,7 @@ impl DiagnosticMessageList {
         let mut no_errors = true;
 
         let v: serde_json::Value = serde_json::from_str(json).unwrap();
+        println!("Adding diagnostic messages: {}", json);
 
         if v.is_array() {
             for message in v.as_array().unwrap() {

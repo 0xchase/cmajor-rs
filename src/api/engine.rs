@@ -62,14 +62,15 @@ impl Engine {
 
         let result = self.engine.load(
             program.object.clone().unwrap(),
-            &resolver as *const ExternalResolver as *const c_void,
+            std::ptr::addr_of!(resolver) as *const c_void,
             ExternalResolver::resolve_variable,
-            &resolver as *const ExternalResolver as *const c_void,
+            std::ptr::addr_of!(resolver) as *const c_void,
             ExternalResolver::resolve_function
         );
 
         if let Some(result) = result {
-            return messages.add_from_json_string(&result);
+            messages.add_from_json_string(&result);
+            todo!()
         }
 
         return true;
@@ -231,28 +232,14 @@ impl ExternalResolver {
         }
     }
 
-    fn resolve_variable(context: *const c_void, ext: *const i8) {
-        if !context.is_null() {
-            // let external_variable = ExternalVariable::from_json(ext);
-        } else {
-            // Context is nullptr
-        }
-
-        todo!()
+    extern "C" fn resolve_variable(context: *const c_void, ext: *const i8) {
+        println!("Resolve variable");
+        unimplemented!();
     }
 
-    fn resolve_function(context: *const c_void, function_name: *const i8, parameter_types: *const i8) {
-        if !context.is_null() {
-            let mut types = Vec::<Type>::new();
-
-            // if parseJSONTypeList(types, parameterTypes)) {
-            //     return context->get_function(functionName, types);
-            // }
-        } else {
-            // Context is nullptr
-        }
-
-        todo!()
+    extern "C" fn resolve_function(context: *const c_void, function_name: *const i8, parameter_types: *const i8) -> *const c_void {
+        println!("Resolve function");
+        unimplemented!();
     }
 
     fn parse_json_type_list(result: &Vec<Type>, json: &str) -> bool {

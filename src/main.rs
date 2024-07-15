@@ -13,7 +13,7 @@ use choc::*;
 pub fn main() {
     Library::load("cmajor/x64/libCmajPerformer.so");
 
-    let path = "test_2.cmajor";
+    let path = "test1.cmajor";
     let contents = std::fs::read_to_string(path).unwrap();
 
     // ===== Engine stuff =====
@@ -27,12 +27,8 @@ pub fn main() {
     println!("Creating program");
     let mut program = Program::new();
 
-    println!("Parsing program");
+    println!("Parsing program {}", path);
     program.parse(&mut messages, path, &contents);
-
-    // println!("Getting syntax tree");
-    // let tree = program.get_syntax_tree("", true, true, true);
-    // println!("Syntax tree is {}", tree);
 
     println!("Loading engine");
     if !engine.load(&mut messages, &program, get_external_variable, get_external_function) {
@@ -53,10 +49,9 @@ pub fn main() {
         println!(" > Found output handle {}", endpoint.id);
     }
 
-    println!("Getting endpoint handle");
     let in_handle = engine.get_endpoint_handle("in_1").unwrap();
     let out_handle = engine.get_endpoint_handle("out_1").unwrap();
-    println!("Got handles {} {}", in_handle, out_handle);
+    println!("Got endpoint handles {} {}", in_handle, out_handle);
 
     println!("Linking engine");
     if !engine.link(&mut messages, None) {
@@ -111,9 +106,22 @@ fn handle(
     println!("Generate code callback");
 }
 
-pub fn get_external_variable(v: &ExternalVariable) -> Value {
+fn get_external_variable(v: &ExternalVariable) -> Value {
+    println!("Get external variable");
     todo!()
 }
-pub fn get_external_function(s: *const i8, ts: Span<Type>) -> *const c_void {
+
+fn get_external_function(s: *const i8, ts: Span<Type>) -> *const c_void {
+    println!("Get external function");
     todo!()
+}
+
+#[no_mangle]
+extern "C" fn cosf(f: f32) -> f32 {
+    f32::cos(f)
+}
+
+#[no_mangle]
+extern "C" fn powf(f: f32, n: f32) -> f32 {
+    f32::powf(f, n)
 }

@@ -5,9 +5,8 @@ use crate::choc::*;
 
 // Engine interface
 
-type RequestExternalVariableFn = fn(context: *const c_void, external_variable: *const i8);
-type RequestExternalFunctionFn =
-    fn(context: *const c_void, function_name: *const i8, function_signature: *const i8);
+type RequestExternalVariableFn = extern "C" fn(context: *const c_void, external_variable: *const i8);
+type RequestExternalFunctionFn = extern "C" fn(context: *const c_void, function_name: *const i8, function_signature: *const i8) -> *const c_void;
 
 type HandleCodeGenOutput = fn(
     context: *const c_void,
