@@ -39,13 +39,9 @@ impl<T> Object<T> {
     }
 }
 
-impl<T> Clone for Object<T> {
+impl<T: Clone> Clone for Object<T> {
     fn clone(&self) -> Self {
-        unsafe {
-            ((**self.ptr).add_ref)(self.ptr);
-        }
-
-        Self { ptr: self.ptr }
+        Self { ptr: self.ptr.clone() }
     }
 }
 

@@ -1,6 +1,10 @@
 use crate::{DiagnosticMessage, DiagnosticMessageList, Object, ProgramInterfaceVtable, SyntaxTreeOptions};
 use crate::com::Library;
 
+unsafe impl Send for Object<ProgramInterfaceVtable> {}
+unsafe impl Sync for Object<ProgramInterfaceVtable> {}
+
+#[derive(Clone)]
 pub struct Program {
     pub object: Option<Object<ProgramInterfaceVtable>>,
 }

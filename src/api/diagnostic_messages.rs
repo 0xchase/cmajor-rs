@@ -38,7 +38,7 @@ impl FullCodeLocation {
 }
 
 pub struct DiagnosticMessageList {
-    messages: Vec<DiagnosticMessage>,
+    pub messages: Vec<DiagnosticMessage>,
 }
 
 impl DiagnosticMessageList {

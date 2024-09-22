@@ -67,3 +67,13 @@ impl Object<ProgramInterfaceVtable> {
         }
     }
 }
+
+impl Clone for ProgramInterfaceVtable {
+    fn clone(&self) -> Self {
+        println!("Performing unsafe clone of ProgramInterfaceVtable");
+        Self {
+            parse2: self.parse2,
+            get_syntax_tree: self.get_syntax_tree,
+        }
+    }
+}

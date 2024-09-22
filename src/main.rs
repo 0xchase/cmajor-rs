@@ -1,17 +1,17 @@
-mod api;
+/*mod api;
 mod com;
 mod helpers;
 mod choc;
 
 use std::{ffi::{c_void, CStr, CString}};
 
-use api::*;
+pub use api::*;
 use com::*;
 use helpers::*;
 use choc::*;
 
 pub fn main() {
-    Library::load("cmajor/x64/libCmajPerformer.so");
+    Library::load("cmajor/x64/libCmajPerformer.dylib");
 
     let path = "test1.cmajor";
     let contents = std::fs::read_to_string(path).unwrap();
@@ -49,8 +49,8 @@ pub fn main() {
         println!(" > Found output handle {}", endpoint.id);
     }
 
-    let in_handle = engine.get_endpoint_handle("in_1").unwrap();
-    let out_handle = engine.get_endpoint_handle("out_1").unwrap();
+    let in_handle = engine.get_endpoint_handle("volume").unwrap();
+    let out_handle = engine.get_endpoint_handle("out").unwrap();
     println!("Got endpoint handles {} {}", in_handle, out_handle);
 
     println!("Linking engine");
@@ -73,7 +73,7 @@ pub fn main() {
     let output = &mut [0.0; BLOCK_SIZE];
 
     println!("Set input frames");
-    performer.set_input_frames(in_handle, input);
+    // performer.set_input_frames(in_handle, input);
 
     println!("Advancing {} frames", BLOCK_SIZE);
     for _ in 0..BLOCK_SIZE {
@@ -124,4 +124,9 @@ extern "C" fn cosf(f: f32) -> f32 {
 #[no_mangle]
 extern "C" fn powf(f: f32, n: f32) -> f32 {
     f32::powf(f, n)
+}
+*/
+
+fn main() {
+
 }

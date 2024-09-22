@@ -54,7 +54,7 @@ impl Engine {
             return false;
         }
 
-        let resolver = ExternalResolver::new(
+        /*let resolver = ExternalResolver::new(
             self.engine.clone(),
             get_external_variable,
             get_external_function,
@@ -71,7 +71,9 @@ impl Engine {
         if let Some(result) = result {
             messages.add_from_json_string(&result);
             todo!()
-        }
+        }*/
+
+        todo!();
 
         return true;
     }
