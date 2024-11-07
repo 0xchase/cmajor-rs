@@ -16,14 +16,6 @@ pub use library::*;
 pub use performer::*;
 pub use program::*;
 
-#[repr(i32)]
-pub enum CmajResult {
-    Ok = 0,
-    InvalidEndpointHandle = -1,
-    InvalidBlockSize = -2,
-    TypeIndexOutOfRange = -3
-}
-
 #[repr(transparent)]
 pub struct Object<T> {
     pub ptr: *mut *const ObjectVtable<T>,

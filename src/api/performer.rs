@@ -3,7 +3,14 @@ use std::ffi::c_void;
 use crate::EndpointHandle;
 use crate::Object;
 use crate::PerformerInterfaceVtable;
-use crate::CmajResult;
+
+#[repr(i32)]
+pub enum CmajResult {
+    Ok = 0,
+    InvalidEndpointHandle = -1,
+    InvalidBlockSize = -2,
+    TypeIndexOutOfRange = -3
+}
 
 pub struct Performer {
     object: Object<PerformerInterfaceVtable>

@@ -54,8 +54,8 @@ impl Engine {
             return false;
         }
 
-        /*let resolver = ExternalResolver::new(
-            self.engine.clone(),
+        let resolver = ExternalResolver::new(
+            // self.engine,
             get_external_variable,
             get_external_function,
         );
@@ -71,9 +71,7 @@ impl Engine {
         if let Some(result) = result {
             messages.add_from_json_string(&result);
             todo!()
-        }*/
-
-        todo!();
+        }
 
         return true;
     }
@@ -216,19 +214,19 @@ pub fn parse_endpoint_details(v: &serde_json::Value, is_input: bool) -> Vec<Endp
 }
 
 struct ExternalResolver {
-    engine: Object<EngineInterfaceVtable>,
+    // engine: Object<EngineInterfaceVtable>,
     get_variable: ExternalVariableProviderFn,
     get_function: ExternalFunctionProviderFn,
 }
 
 impl ExternalResolver {
     fn new(
-        engine: Object<EngineInterfaceVtable>,
+        // engine: Object<EngineInterfaceVtable>,
         get_variable: ExternalVariableProviderFn,
         get_function: ExternalFunctionProviderFn,
     ) -> Self {
         Self {
-            engine,
+            // engine,
             get_variable,
             get_function,
         }

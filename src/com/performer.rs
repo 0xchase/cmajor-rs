@@ -12,6 +12,8 @@ type HandleOutputEventCallback = unsafe fn(
     value_data_size: u32,
 );
 
+use crate::CmajResult;
+
 #[repr(C)]
 pub struct PerformerInterfaceVtable {
     set_block_size: unsafe fn(*mut *const ObjectVtable<Self>, num_frames_for_next_block: u32),
