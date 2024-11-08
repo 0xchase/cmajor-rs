@@ -2,7 +2,6 @@ use std::ffi::{c_void, CStr};
 
 use super::*;
 
-type EndpointHandle = u32;
 type HandleOutputEventCallback = unsafe fn(
     context: *const c_void,
     EndpointHandle,
@@ -12,7 +11,7 @@ type HandleOutputEventCallback = unsafe fn(
     value_data_size: u32,
 );
 
-use crate::CmajResult;
+use crate::{CmajResult, EndpointHandle};
 
 #[repr(C)]
 pub struct PerformerInterfaceVtable {

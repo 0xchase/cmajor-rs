@@ -1,7 +1,7 @@
 use std::ffi::{c_void, CStr, CString};
 
 use super::*;
-use crate::choc::*;
+use crate::{choc::*, EndpointHandle};
 
 // Engine interface
 
@@ -214,5 +214,3 @@ fn request_external_function_function(
 ) {
     panic!("Requesting external function");
 }*/
-
-pub type EndpointHandle = u32;

@@ -90,9 +90,9 @@ impl Engine {
         parse_endpoint_details(&details["outputs"], false)
     }
 
-    pub fn get_endpoint_handle(&self, endpoint_id: &str) -> Result<EndpointHandle, String> {
+    pub fn get_endpoint_handle(&self, endpoint_id: &EndpointId) -> Result<EndpointHandle, String> {
         if self.engine.is_loaded() {
-            Ok(self.engine.get_endpoint_handle(endpoint_id))
+            Ok(self.engine.get_endpoint_handle(&endpoint_id))
         } else {
             Err(String::from("Engine is not loaded"))
         }
@@ -166,7 +166,6 @@ pub fn parse_endpoint_details(v: &serde_json::Value, is_input: bool) -> Vec<Endp
     // println!("{}", v);
     for v in v.as_array().unwrap() {
         let id = v["endpointID"].as_str().unwrap().to_string();
-        let id = EndpointId::create(id);
         let mut types = Vec::new();
 
         let ty = match v["endpointType"].as_str().unwrap() {

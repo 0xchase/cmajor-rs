@@ -1,4 +1,4 @@
-/*mod api;
+mod api;
 mod com;
 mod helpers;
 mod choc;
@@ -13,7 +13,7 @@ use choc::*;
 pub fn main() {
     Library::load("cmajor/x64/libCmajPerformer.dylib");
 
-    let path = "test1.cmajor";
+    let path = "/Users/chasekanipe/Github/nodus/modules/examples/SineSynth/SineSynth.cmajor";
     let contents = std::fs::read_to_string(path).unwrap();
 
     // ===== Engine stuff =====
@@ -49,8 +49,8 @@ pub fn main() {
         println!(" > Found output handle {}", endpoint.id);
     }
 
-    let in_handle = engine.get_endpoint_handle("volume").unwrap();
-    let out_handle = engine.get_endpoint_handle("out").unwrap();
+    let in_handle = engine.get_endpoint_handle(&String::from("volume")).unwrap();
+    let out_handle = engine.get_endpoint_handle(&String::from("out")).unwrap();
     println!("Got endpoint handles {} {}", in_handle, out_handle);
 
     println!("Linking engine");
@@ -124,9 +124,4 @@ extern "C" fn cosf(f: f32) -> f32 {
 #[no_mangle]
 extern "C" fn powf(f: f32, n: f32) -> f32 {
     f32::powf(f, n)
-}
-*/
-
-fn main() {
-
 }

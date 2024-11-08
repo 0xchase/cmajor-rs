@@ -1,11 +1,27 @@
+use std::fmt::Display;
+
 use crate::choc::*;
 
-#[derive(PartialEq)]
+pub type EndpointHandle = u32;
+
+#[derive(Copy, Clone, PartialEq)]
 pub enum EndpointType {
     Unknown = 0,
     Stream = 1,
     Value = 2,
     Event = 3
+}
+
+impl Display for EndpointType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            EndpointType::Unknown => "unknown",
+            EndpointType::Stream => "stream",
+            EndpointType::Value => "value",
+            EndpointType::Event => "event"
+        };
+        write!(f, "{}", s)
+    }
 }
 
 #[derive(PartialEq)]
@@ -23,24 +39,9 @@ pub enum EndpointPurpose {
     TimlinePosition
 }
 
-pub struct EndpointId {
-    id: String
-}
+pub type EndpointId = String;
 
-impl EndpointId {
-    pub fn create(id: String) -> Self {
-        Self {
-            id
-        }
-    }
-}
-
-impl std::fmt::Display for EndpointId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.id)
-    }
-}
-
+#[derive(Clone)]
 pub struct EndpointDetails {
     pub id: EndpointId,
     pub ty: EndpointType,
